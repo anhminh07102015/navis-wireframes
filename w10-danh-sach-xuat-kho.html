@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách xuất kho - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* Page-specific styles */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 260px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            width: 100%;
+            margin-left: 8px;
+            color: #344054;
+        }
+
+        .search-box input::placeholder {
+            color: #98a2b3;
+        }
+
+        .search-icon {
+            color: #98a2b3;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #344054;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+        .btn-icon {
+            background: #fff;
+            color: #475467;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-icon:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+        .new-badge {
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        /* Table */
+        .table-container {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        thead th {
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475467;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        tbody td {
+            padding: 11px 14px;
+            font-size: 13px;
+            color: #344054;
+            border-bottom: 1px solid #f2f4f7;
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: #f0f5ff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Highlighted TEN CONG TY column */
+        .col-tenant {
+            background: #eff6ff;
+        }
+
+        thead th.col-tenant {
+            background: #dbeafe;
+        }
+
+        .tenant-filter {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tenant-filter select {
+            border: 1px solid #bfdbfe;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 11px;
+            background: #fff;
+            color: #1e40af;
+            cursor: pointer;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-gray {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-teal {
+            background: #ccfbf1;
+            color: #115e59;
+        }
+
+        /* Actions column */
+        .btn-more {
+            background: none;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #475467;
+            transition: all 0.15s;
+            line-height: 1;
+        }
+
+        .btn-more:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+        /* Amount column */
+        .amount {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #667085;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .pagination select {
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 13px;
+            color: #344054;
+            background: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main-area">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <a href="w11-tao-phieu-xuat-kho.html" class="btn-primary">+ TẠO PHIẾU XUẤT KHO</a>
+                        <button class="btn-outline">
+                            &#128196; Tải mẫu phiếu <span class="new-badge">MỚI</span>
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="search-box">
+                            <span class="search-icon">&#128269;</span>
+                            <input type="text" placeholder="Tìm kiếm..." id="searchInput">
+                        </div>
+                        <button class="btn-icon">&#128200; Hiện thống kê</button>
+                        <button class="btn-icon">&#128295; Filter</button>
+                        <button class="btn-icon">&#8634; Làm mới</button>
+                        <button class="btn-icon">&#128260; Tải lại</button>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ngày thực hiện</th>
+                                <th class="col-tenant">
+                                    <div class="tenant-filter">
+                                        Tên công ty
+                                        <select id="tenantFilter" onchange="filterByTenant()">
+                                            <option value="">Tất cả</option>
+                                            <option value="KHO NAVIS">KHO NAVIS</option>
+                                            <option value="KHO LABEE">KHO LABEE</option>
+                                            <option value="KHO POTACHEM">KHO POTACHEM</option>
+                                        </select>
+                                    </div>
+                                </th>
+                                <th>Trạng thái</th>
+                                <th>Mã xuất kho</th>
+                                <th>Ngày khách nhận</th>
+                                <th>Tên khách hàng</th>
+                                <th style="text-align:right">Giá trị xuất kho</th>
+                                <th>NV giao nhận</th>
+                                <th style="text-align:center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td>07/10/2026</td>
+                                <td class="col-tenant"><strong>KHO NAVIS</strong></td>
+                                <td><span class="badge badge-gray">Chưa thực hiện</span></td>
+                                <td>XK26-21626</td>
+                                <td>__</td>
+                                <td>CỔ PHẦN DƯỢC PHẨM HÀ TÂY</td>
+                                <td class="amount">367,200</td>
+                                <td>Gửi chuyển phát</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>07/10/2026</td>
+                                <td class="col-tenant"><strong>KHO NAVIS</strong></td>
+                                <td><span class="badge badge-blue">Đang thực hiện</span></td>
+                                <td>XK26-21625</td>
+                                <td>__</td>
+                                <td>DƯỢC PHẨM MINH DÂN</td>
+                                <td class="amount">2,592,000</td>
+                                <td>Gửi chuyển phát</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-tenant"><strong>KHO LABEE</strong></td>
+                                <td><span class="badge badge-green">Đã xuất kho</span></td>
+                                <td>XK26-21624</td>
+                                <td>__</td>
+                                <td>DƯỢC PHẨM ĐẠT VI PHÚ</td>
+                                <td class="amount">2,916,000</td>
+                                <td>Gửi chuyển phát</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-tenant"><strong>KHO NAVIS</strong></td>
+                                <td><span class="badge badge-green">Đã xuất kho</span></td>
+                                <td>XK26-21620</td>
+                                <td>__</td>
+                                <td>DƯỢC PHẨM KHÁNH HÒA</td>
+                                <td class="amount">6,609,600</td>
+                                <td>Lâm Minh Quý</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-tenant"><strong>KHO NAVIS</strong></td>
+                                <td><span class="badge badge-green">Đã xuất kho</span></td>
+                                <td>XK26-21619</td>
+                                <td>__</td>
+                                <td>DƯỢC PHẨM IMEXPHARM</td>
+                                <td class="amount">9,612,000</td>
+                                <td>Gửi chuyển phát</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-tenant"><strong>KHO LABEE</strong></td>
+                                <td><span class="badge badge-teal">Đã gửi hàng</span></td>
+                                <td>XK26-21615</td>
+                                <td>__</td>
+                                <td>CÔNG TY TNHH LABEE</td>
+                                <td class="amount">25,901,400</td>
+                                <td>Gửi chuyển phát</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-tenant"><strong>KHO POTACHEM</strong></td>
+                                <td><span class="badge badge-green">Đã xuất kho</span></td>
+                                <td>XK26-21610</td>
+                                <td>__</td>
+                                <td>DƯỢC PHẨM EURO SANT&Eacute;</td>
+                                <td class="amount">2,073,600</td>
+                                <td>Gửi chuyển phát</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-tenant"><strong>KHO NAVIS</strong></td>
+                                <td><span class="badge badge-green">Đã xuất kho</span></td>
+                                <td>XK26-21602</td>
+                                <td>__</td>
+                                <td>DƯỢC PHẨM RELIV</td>
+                                <td class="amount">12,960,000</td>
+                                <td>Lâm Minh Quý</td>
+                                <td style="text-align:center"><button class="btn-more" title="Thao tác">&#8942;</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination">
+                        <span>Số hàng mỗi trang:</span>
+                        <select>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span>1-20 trong 13841</span>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w10-danh-sach-xuat-kho.html', 'XUẤT KHO');</script>
+    <script>
+        // Search filter
+        document.getElementById('searchInput').addEventListener('input', function () {
+            var filter = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(function (row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+
+        // Tenant column filter
+        function filterByTenant() {
+            var selected = document.getElementById('tenantFilter').value;
+            var rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(function (row) {
+                if (!selected) {
+                    row.style.display = '';
+                    return;
+                }
+                var tenantCell = row.querySelectorAll('td')[1];
+                var tenantText = tenantCell ? tenantCell.textContent.trim() : '';
+                row.style.display = tenantText === selected ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

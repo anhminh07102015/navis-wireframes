@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo phiếu điều chuyển - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* ── Back link ────────────────────────────────────────────────── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #2563eb;
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Form Card ────────────────────────────────────────────────── */
+        .form-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #344054;
+            margin-bottom: 6px;
+        }
+
+        .form-group label .required {
+            color: #dc2626;
+            margin-left: 2px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #344054;
+            background: #fff;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #98a2b3;
+        }
+
+        .form-group select {
+            appearance: auto;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* ── Source/Dest Headers ───────────────────────────────────────── */
+        .location-header {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .location-box {
+            flex: 1;
+            border-radius: 10px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .location-box--source {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+        }
+
+        .location-box--dest {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+        }
+
+        .location-box .box-icon {
+            font-size: 24px;
+        }
+
+        .location-box--source .box-icon { color: #2563eb; }
+        .location-box--dest .box-icon { color: #16a34a; }
+
+        .location-box .box-content {
+            flex: 1;
+        }
+
+        .location-box .box-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .location-box--source .box-label { color: #2563eb; }
+        .location-box--dest .box-label { color: #16a34a; }
+
+        .location-box select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #344054;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .location-box select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .transfer-direction {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            color: #94a3b8;
+            font-size: 28px;
+        }
+
+        /* ── Product Table ────────────────────────────────────────────── */
+        .product-section {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .product-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .product-count {
+            font-size: 13px;
+            color: #667085;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .btn-add-product {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
+        }
+
+        .btn-add-product:hover {
+            background: #1d4ed8;
+        }
+
+        .product-table-wrapper {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .product-table th {
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475467;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        .product-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f2f4f7;
+            vertical-align: middle;
+        }
+
+        .product-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .product-table input,
+        .product-table select {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #344054;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .product-table input:focus,
+        .product-table select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        .product-table input::placeholder {
+            color: #9ca3af;
+        }
+
+        .product-table input[readonly] {
+            background: #f9fafb;
+            color: #667085;
+        }
+
+        .btn-delete-row {
+            background: none;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            color: #dc2626;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .btn-delete-row:hover {
+            background: #fef2f2;
+        }
+
+        .col-stt {
+            width: 50px;
+            text-align: center;
+        }
+
+        .col-qty {
+            width: 100px;
+        }
+
+        .col-avail {
+            width: 80px;
+            text-align: center;
+        }
+
+        .col-unit {
+            width: 80px;
+        }
+
+        .col-dest-loc {
+            min-width: 180px;
+        }
+
+        .col-delete {
+            width: 50px;
+            text-align: center;
+        }
+
+        .avail-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #16a34a;
+        }
+
+        /* ── Bottom / Footer Bar ──────────────────────────────────────── */
+        .form-bottom {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-info {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        .summary-item strong {
+            font-weight: 700;
+            color: #1e293b;
+            margin-left: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            background: #fff;
+            color: #344054;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-cancel:hover {
+            background: #f9fafb;
+        }
+
+        .btn-draft {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            background: #fffbeb;
+            color: #92400e;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-draft:hover {
+            background: #fef3c7;
+        }
+
+        .btn-confirm {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-confirm:hover {
+            background: #1d4ed8;
+        }
+
+        /* ── Responsive ───────────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .form-row, .location-header {
+                flex-direction: column;
+            }
+            .transfer-direction {
+                transform: rotate(90deg);
+                padding: 8px 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-bottom {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            .summary-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main-area">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Back link -->
+                <a href="w05-dieu-chuyen-vi-tri.html" class="back-link">
+                    <span class="material-icons-outlined" style="font-size:16px;">arrow_back</span>
+                    Quay lại danh sách
+                </a>
+
+                <!-- Form Section: Info -->
+                <div class="form-card">
+                    <div class="form-card-title">TẠO PHIẾU ĐIỀU CHUYỂN</div>
+
+                    <!-- Row 1 -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Đơn vị thuê kho <span class="required">*</span></label>
+                                <select id="tenantSelect">
+                                    <option value="">Chọn đơn vị thuê kho</option>
+                                    <option value="navis" selected>KHO NAVIS</option>
+                                    <option value="labee">KHO LABEE</option>
+                                    <option value="potachem">KHO POTACHEM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Ngày tạo</label>
+                                <input type="date" value="2026-10-06">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Người tạo</label>
+                                <select>
+                                    <option>Lâm Minh Quý</option>
+                                    <option>Nguyễn Văn A</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Source & Destination -->
+                    <div class="location-header">
+                        <div class="location-box location-box--source">
+                            <span class="material-icons-outlined box-icon">output</span>
+                            <div class="box-content">
+                                <div class="box-label">Vị trí nguồn (chuyển đi)</div>
+                                <select id="sourceLocation">
+                                    <option value="">Chọn vị trí nguồn...</option>
+                                    <option value="B06.301">B06.301</option>
+                                    <option value="B06.302">B06.302</option>
+                                    <option value="B06.308">B06.308</option>
+                                    <option value="B06.401">B06.401</option>
+                                    <option value="B06.105">B06.105</option>
+                                    <option value="B06.201">B06.201</option>
+                                    <option value="B06.202">B06.202</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="transfer-direction">
+                            <span class="material-icons-outlined">arrow_forward</span>
+                        </div>
+
+                        <div class="location-box location-box--dest">
+                            <span class="material-icons-outlined box-icon">input</span>
+                            <div class="box-content">
+                                <div class="box-label">Vị trí đích (chuyển đến)</div>
+                                <select id="destLocation">
+                                    <option value="">Chọn vị trí đích...</option>
+                                    <option value="B06.502">B06.502</option>
+                                    <option value="B06.503">B06.503</option>
+                                    <option value="B06.410">B06.410</option>
+                                    <option value="B06.405">B06.405</option>
+                                    <option value="B06.501">B06.501</option>
+                                    <option value="B06.310">B06.310</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Note -->
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Lý do điều chuyển</label>
+                                <textarea placeholder="Nhập lý do điều chuyển (không bắt buộc)..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Table Section -->
+                <div class="product-section">
+                    <div class="product-header">
+                        <span class="product-title">
+                            Danh sách sản phẩm điều chuyển
+                            <span class="product-count" id="productCount">(3 sản phẩm)</span>
+                        </span>
+                        <button class="btn-add-product" id="btnAddRow">+ Thêm sản phẩm</button>
+                    </div>
+
+                    <div class="product-table-wrapper">
+                        <table class="product-table" id="productTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-stt">STT</th>
+                                    <th>MÃ SP</th>
+                                    <th>TÊN SẢN PHẨM</th>
+                                    <th class="col-avail">TỒN KHO</th>
+                                    <th class="col-qty">SL CHUYỂN</th>
+                                    <th class="col-unit">ĐƠN VỊ</th>
+                                    <th class="col-dest-loc">VỊ TRÍ ĐÍCH CHI TIẾT</th>
+                                    <th class="col-delete">XÓA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productBody">
+                                <tr>
+                                    <td class="col-stt">1</td>
+                                    <td><input type="text" value="SP-0012" placeholder="Mã SP..."></td>
+                                    <td><input type="text" value="Sodium Hydroxide" placeholder="Tên sản phẩm..."></td>
+                                    <td class="col-avail"><span class="avail-text">10</span></td>
+                                    <td class="col-qty"><input type="number" value="5" min="1"></td>
+                                    <td class="col-unit">
+                                        <select>
+                                            <option>Chai</option>
+                                            <option>Hộp</option>
+                                            <option>Thùng</option>
+                                            <option>Kg</option>
+                                            <option>Lít</option>
+                                        </select>
+                                    </td>
+                                    <td class="col-dest-loc">
+                                        <select>
+                                            <option value="">Chọn pallet...</option>
+                                            <option value="B06.502.1" selected>B06.502.1</option>
+                                            <option value="B06.502.2">B06.502.2</option>
+                                            <option value="B06.502.3">B06.502.3</option>
+                                        </select>
+                                    </td>
+                                    <td class="col-delete">
+                                        <button class="btn-delete-row" title="Xóa dòng" onclick="deleteRow(this)">&#10005;</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-stt">2</td>
+                                    <td><input type="text" value="SP-0045" placeholder="Mã SP..."></td>
+                                    <td><input type="text" value="Hydrochloric Acid" placeholder="Tên sản phẩm..."></td>
+                                    <td class="col-avail"><span class="avail-text">5</span></td>
+                                    <td class="col-qty"><input type="number" value="3" min="1"></td>
+                                    <td class="col-unit">
+                                        <select>
+                                            <option selected>Chai</option>
+                                            <option>Hộp</option>
+                                            <option>Thùng</option>
+                                            <option>Kg</option>
+                                            <option>Lít</option>
+                                        </select>
+                                    </td>
+                                    <td class="col-dest-loc">
+                                        <select>
+                                            <option value="">Chọn pallet...</option>
+                                            <option value="B06.502.1">B06.502.1</option>
+                                            <option value="B06.502.2" selected>B06.502.2</option>
+                                            <option value="B06.502.3">B06.502.3</option>
+                                        </select>
+                                    </td>
+                                    <td class="col-delete">
+                                        <button class="btn-delete-row" title="Xóa dòng" onclick="deleteRow(this)">&#10005;</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-stt">3</td>
+                                    <td><input type="text" value="SP-0078" placeholder="Mã SP..."></td>
+                                    <td><input type="text" value="Ethanol 96%" placeholder="Tên sản phẩm..."></td>
+                                    <td class="col-avail"><span class="avail-text">8</span></td>
+                                    <td class="col-qty"><input type="number" value="8" min="1"></td>
+                                    <td class="col-unit">
+                                        <select>
+                                            <option selected>Chai</option>
+                                            <option>Hộp</option>
+                                            <option>Thùng</option>
+                                            <option>Kg</option>
+                                            <option>Lít</option>
+                                        </select>
+                                    </td>
+                                    <td class="col-dest-loc">
+                                        <select>
+                                            <option value="">Chọn pallet...</option>
+                                            <option value="B06.502.1">B06.502.1</option>
+                                            <option value="B06.502.2">B06.502.2</option>
+                                            <option value="B06.502.3" selected>B06.502.3</option>
+                                        </select>
+                                    </td>
+                                    <td class="col-delete">
+                                        <button class="btn-delete-row" title="Xóa dòng" onclick="deleteRow(this)">&#10005;</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bottom: Summary + Actions -->
+                <div class="form-bottom">
+                    <div class="summary-info">
+                        <span class="summary-item">Tổng sản phẩm: <strong id="totalProducts">3</strong></span>
+                        <span class="summary-item">Tổng số lượng: <strong id="totalQty">16</strong></span>
+                        <span class="summary-item">Nguồn: <strong>B06.301</strong></span>
+                        <span class="summary-item">Đích: <strong>B06.502</strong></span>
+                    </div>
+                    <div class="form-actions">
+                        <a href="w05-dieu-chuyen-vi-tri.html" class="btn-cancel">Hủy</a>
+                        <button class="btn-draft" onclick="alert('Wireframe demo: Đã lưu nháp!')">Lưu nháp</button>
+                        <button class="btn-confirm" onclick="alert('Wireframe demo: Đã gửi yêu cầu điều chuyển!')">
+                            <span class="material-icons-outlined" style="font-size:16px;">send</span>
+                            Gửi yêu cầu điều chuyển
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w05-dieu-chuyen-vi-tri.html', 'ĐIỀU CHUYỂN VỊ TRÍ / TẠO PHIẾU');</script>
+    <script>
+        var rowCounter = 3;
+
+        // Add product row
+        document.getElementById('btnAddRow').addEventListener('click', function() {
+            rowCounter++;
+            var tbody = document.getElementById('productBody');
+
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td class="col-stt">' + rowCounter + '</td>' +
+                '<td><input type="text" placeholder="Mã SP..."></td>' +
+                '<td><input type="text" placeholder="Tên sản phẩm..."></td>' +
+                '<td class="col-avail"><span class="avail-text">--</span></td>' +
+                '<td class="col-qty"><input type="number" placeholder="0" min="1"></td>' +
+                '<td class="col-unit">' +
+                    '<select>' +
+                        '<option value="">--</option>' +
+                        '<option>Chai</option>' +
+                        '<option>Hộp</option>' +
+                        '<option>Thùng</option>' +
+                        '<option>Kg</option>' +
+                        '<option>Lít</option>' +
+                    '</select>' +
+                '</td>' +
+                '<td class="col-dest-loc">' +
+                    '<select>' +
+                        '<option value="">Chọn pallet...</option>' +
+                        '<option value="B06.502.1">B06.502.1</option>' +
+                        '<option value="B06.502.2">B06.502.2</option>' +
+                        '<option value="B06.502.3">B06.502.3</option>' +
+                        '<option value="B06.502.4">B06.502.4</option>' +
+                        '<option value="B06.502.5">B06.502.5</option>' +
+                    '</select>' +
+                '</td>' +
+                '<td class="col-delete">' +
+                    '<button class="btn-delete-row" title="Xóa dòng" onclick="deleteRow(this)">&#10005;</button>' +
+                '</td>';
+
+            tbody.appendChild(tr);
+            updateCount();
+        });
+
+        function deleteRow(btn) {
+            var row = btn.closest('tr');
+            if (row) {
+                row.remove();
+                // Re-number rows
+                var rows = document.querySelectorAll('#productBody tr');
+                rows.forEach(function(r, i) {
+                    r.querySelector('.col-stt').textContent = i + 1;
+                });
+                rowCounter = rows.length;
+                updateCount();
+            }
+        }
+
+        function updateCount() {
+            var rows = document.querySelectorAll('#productBody tr');
+            document.getElementById('productCount').textContent = '(' + rows.length + ' sản phẩm)';
+            document.getElementById('totalProducts').textContent = rows.length;
+
+            var totalQty = 0;
+            rows.forEach(function(r) {
+                var input = r.querySelector('.col-qty input');
+                if (input && input.value) {
+                    totalQty += parseInt(input.value) || 0;
+                }
+            });
+            document.getElementById('totalQty').textContent = totalQty;
+        }
+    </script>
+</body>
+</html>

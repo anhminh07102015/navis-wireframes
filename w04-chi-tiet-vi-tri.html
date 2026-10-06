@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết vị trí hàng hoá - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* Page-specific styles */
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+            transition: color 0.15s;
+        }
+
+        .back-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* Section card panel */
+        .section-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #101828;
+            margin: 0 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* Form layout 2 columns */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px 40px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 6px;
+        }
+
+        .form-value {
+            font-size: 14px;
+            color: #344054;
+            padding: 10px 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .form-value.large {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #344054;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: auto;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        /* Capacity slider */
+        .capacity-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475467;
+            margin-bottom: 8px;
+        }
+
+        .capacity-slider {
+            display: flex;
+            gap: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #d0d5dd;
+            background: #f9fafb;
+        }
+
+        .capacity-segment {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #667085;
+            cursor: pointer;
+            border-right: 1px solid #d0d5dd;
+            transition: all 0.2s;
+            user-select: none;
+            background: #f9fafb;
+        }
+
+        .capacity-segment:last-child {
+            border-right: none;
+        }
+
+        .capacity-segment:hover {
+            background: #e5e7eb;
+        }
+
+        .capacity-segment.active-0 {
+            background: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        .capacity-segment.active-25 {
+            background: #fef9c3;
+            color: #854d0e;
+            border-color: #fde68a;
+        }
+
+        .capacity-segment.active-50 {
+            background: #fed7aa;
+            color: #9a3412;
+            border-color: #fdba74;
+        }
+
+        .capacity-segment.active-75 {
+            background: #fbbf24;
+            color: #78350f;
+            border-color: #f59e0b;
+        }
+
+        .capacity-segment.active-100 {
+            background: #fca5a5;
+            color: #991b1b;
+            border-color: #f87171;
+        }
+
+        /* Update button */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Product table */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .table-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #101828;
+        }
+
+        .table-container {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475467;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        thead th:first-child {
+            text-align: center;
+            width: 60px;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #344054;
+            border-bottom: 1px solid #f2f4f7;
+        }
+
+        tbody td:first-child {
+            text-align: center;
+            color: #98a2b3;
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: #f0f5ff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .td-code {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Back link -->
+                <a href="w03-so-do-kho.html" class="back-link">&larr; Quay lại Sơ đồ kho</a>
+
+                <!-- Section 1: Thông tin vị trí -->
+                <div class="section-card">
+                    <h2 class="section-title">Thông tin vị trí</h2>
+                    <div class="form-grid">
+                        <!-- Left column -->
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label>Tên đơn vị thuê kho</label>
+                                <div class="form-value">KHO NAVIS</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Tên khu vực lưu trữ</label>
+                                <div class="form-value">Room 1</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Mã vị trí</label>
+                                <div class="form-value large">B06.301.1</div>
+                            </div>
+                        </div>
+
+                        <!-- Right column -->
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label>Nhóm sản phẩm</label>
+                                <select id="productGroup">
+                                    <option value="">Chọn nhóm</option>
+                                    <option value="hoa-chat-phan-tich">Hóa chất phân tích</option>
+                                    <option value="hoa-chat-cong-nghiep">Hóa chất công nghiệp</option>
+                                    <option value="dung-moi">Dung môi</option>
+                                    <option value="axit">Axit</option>
+                                    <option value="bazo">Bazơ</option>
+                                    <option value="muoi">Muối</option>
+                                    <option value="chat-chi-thi">Chất chỉ thị</option>
+                                    <option value="hoa-chat-huu-co">Hóa chất hữu cơ</option>
+                                    <option value="hoa-chat-vo-co">Hóa chất vô cơ</option>
+                                    <option value="duoc-pham">Dược phẩm</option>
+                                    <option value="my-pham">Mỹ phẩm</option>
+                                    <option value="thuc-pham">Thực phẩm</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="capacity-label">Tình trạng sức chứa</label>
+                                <div class="capacity-slider" id="capacitySlider">
+                                    <div class="capacity-segment" data-value="0" onclick="selectCapacity(0)">0%</div>
+                                    <div class="capacity-segment" data-value="25" onclick="selectCapacity(25)">25%</div>
+                                    <div class="capacity-segment" data-value="50" onclick="selectCapacity(50)">50%</div>
+                                    <div class="capacity-segment active-75" data-value="75" onclick="selectCapacity(75)">75%</div>
+                                    <div class="capacity-segment" data-value="100" onclick="selectCapacity(100)">100%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Update button -->
+                        <div class="form-actions">
+                            <button class="btn-primary" onclick="handleUpdate()">Cập nhật</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Danh sách sản phẩm tại vị trí -->
+                <div class="section-card">
+                    <div class="table-header">
+                        <h2 class="table-title">Sản phẩm tại vị trí B06.301.1</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã SP</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Mã LOT</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn vị</th>
+                                    <th>Ngày nhập</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td class="td-code">SP-0012</td>
+                                    <td>Sodium Hydroxide NaOH 99%</td>
+                                    <td class="td-code">LOT-2026-001</td>
+                                    <td>10</td>
+                                    <td>Thùng</td>
+                                    <td>05/10/2026</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td class="td-code">SP-0045</td>
+                                    <td>Hydrochloric Acid HCl 37%</td>
+                                    <td class="td-code">LOT-2026-015</td>
+                                    <td>5</td>
+                                    <td>Chai</td>
+                                    <td>03/10/2026</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td class="td-code">SP-0078</td>
+                                    <td>Ethanol 96%</td>
+                                    <td class="td-code">LOT-2026-022</td>
+                                    <td>8</td>
+                                    <td>Can</td>
+                                    <td>01/10/2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w03-so-do-kho.html', 'QUẢN LÝ SẢN PHẨM / VỊ TRÍ HÀNG HOÁ / CHI TIẾT VỊ TRÍ');</script>
+    <script>
+        // Track current capacity value
+        var currentCapacity = 75;
+
+        /**
+         * Select a capacity segment and update the visual state.
+         * @param {number} value - capacity percentage (0, 25, 50, 75, 100)
+         */
+        function selectCapacity(value) {
+            currentCapacity = value;
+            var segments = document.querySelectorAll('#capacitySlider .capacity-segment');
+            for (var i = 0; i < segments.length; i++) {
+                var seg = segments[i];
+                // Remove all active-* classes
+                seg.className = 'capacity-segment';
+                // Apply active class to the selected segment
+                if (parseInt(seg.getAttribute('data-value'), 10) === value) {
+                    seg.classList.add('active-' + value);
+                }
+            }
+        }
+
+        /**
+         * Handle the update button click.
+         */
+        function handleUpdate() {
+            var group = document.getElementById('productGroup');
+            var groupText = group.options[group.selectedIndex].text;
+            alert(
+                'Wireframe demo: Cập nhật thành công!\n\n' +
+                'Nhóm sản phẩm: ' + groupText + '\n' +
+                'Sức chứa: ' + currentCapacity + '%'
+            );
+        }
+    </script>
+</body>
+</html>

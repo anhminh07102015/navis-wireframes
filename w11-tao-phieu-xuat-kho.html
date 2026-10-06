@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo xuất kho - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* ── Page Layout ───────────────────────────────────────── */
+        .page-body {
+            background: #f5f5f5;
+        }
+
+        /* Two-column layout: main left + sidebar right */
+        .form-layout {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .form-side {
+            width: 280px;
+            flex-shrink: 0;
+        }
+
+        /* Flat white card - no heavy borders */
+        .form-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Section titles - bold teal/blue */
+        .section-title {
+            color: #0277bd;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .section-title-row .section-title {
+            margin-bottom: 0;
+        }
+
+        /* ── Checkbox row ──────────────────────────────────────── */
+        .top-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #344054;
+        }
+        .top-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+
+        /* ── Form rows ─────────────────────────────────────────── */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 20px;
+            margin-bottom: 16px;
+        }
+        .form-row--full {
+            grid-template-columns: 1fr;
+        }
+        .form-row--3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+        .form-group label .required {
+            color: #dc2626;
+            margin-left: 2px;
+        }
+
+        /* MUI-like inputs */
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #c4c4c4;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #344054;
+            background: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            font-family: inherit;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+        .form-input[readonly] {
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: default;
+        }
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23757575' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        textarea.form-input {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        /* Auto-filled text display (not editable) */
+        .auto-text {
+            font-size: 14px;
+            color: #344054;
+            padding: 10px 0 2px 0;
+            min-height: 20px;
+        }
+        .auto-text.empty {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* ── NEW feature highlight ─────────────────────────────── */
+        .highlight-wrapper {
+            position: relative;
+            border: 2px solid #2563eb;
+            border-radius: 6px;
+            padding: 12px 14px 14px;
+            background: #f0f7ff;
+        }
+        .highlight-badge {
+            position: absolute;
+            top: -10px;
+            left: 12px;
+            background: #2563eb;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .highlight-wrapper .form-group label {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        /* ── Sidebar panel fields ──────────────────────────────── */
+        .side-field {
+            margin-bottom: 14px;
+        }
+        .side-field:last-child {
+            margin-bottom: 0;
+        }
+        .side-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        /* ── Product table ─────────────────────────────────────── */
+        .product-table-wrapper {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .product-table thead {
+            background: #1a3353;
+        }
+        .product-table thead th {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 10px 12px;
+            text-align: left;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .product-table thead th.text-center { text-align: center; }
+        .product-table thead th.text-right { text-align: right; }
+
+        .product-table tbody td {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #344054;
+            border-bottom: 1px solid #f2f4f7;
+            vertical-align: middle;
+        }
+        .product-table tbody td.text-center { text-align: center; }
+        .product-table tbody td.text-right { text-align: right; }
+
+        /* Highlighted column header for new feature */
+        .th-highlight {
+            position: relative;
+        }
+        .th-highlight-badge {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            font-size: 8px;
+            padding: 1px 5px;
+            border-radius: 6px;
+            margin-left: 4px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Product main row */
+        .product-main-row {
+            background: #fff;
+        }
+        .product-main-row td {
+            border-bottom: none !important;
+            padding-bottom: 4px;
+        }
+
+        .product-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #344054;
+            box-sizing: border-box;
+            font-family: inherit;
+            background: #fff;
+        }
+        .product-select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        /* Location sub-rows */
+        .loc-row {
+            background: #f0f7ff;
+        }
+        .loc-row td {
+            padding-top: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e0ecf8 !important;
+            font-size: 12px;
+        }
+
+        .loc-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: #1e40af;
+        }
+        .loc-arrow {
+            color: #93c5fd;
+            font-size: 14px;
+        }
+        .loc-badge {
+            display: inline-block;
+            background: #2563eb;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+        .loc-stock {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .loc-stock strong {
+            color: #344054;
+        }
+
+        .loc-qty-input {
+            width: 70px;
+            padding: 4px 6px;
+            border: 1px solid #93c5fd;
+            border-radius: 5px;
+            font-size: 12px;
+            text-align: right;
+            background: #fff;
+            color: #1e40af;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .loc-qty-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Add location row */
+        .loc-add-row {
+            background: #f8fbff;
+        }
+        .loc-add-row td {
+            padding-top: 4px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb !important;
+        }
+        .btn-add-loc {
+            background: none;
+            border: 1px dashed #93c5fd;
+            border-radius: 5px;
+            padding: 3px 10px;
+            font-size: 11px;
+            color: #2563eb;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+        }
+        .btn-add-loc:hover {
+            background: #eff6ff;
+            border-color: #2563eb;
+        }
+
+        .btn-remove-loc {
+            background: none;
+            border: none;
+            color: #93a3b8;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .btn-remove-loc:hover {
+            color: #dc2626;
+            background: #fef2f2;
+        }
+
+        /* Placeholder location row */
+        .loc-placeholder td {
+            color: #9ca3af;
+            font-size: 12px;
+            font-style: italic;
+            padding-left: 40px;
+        }
+
+        .btn-delete-row {
+            background: none;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            padding: 4px 10px;
+            color: #dc2626;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-delete-row:hover {
+            background: #fef2f2;
+        }
+
+        .product-total-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        /* + Them SP button */
+        .btn-add-product {
+            background: #fff;
+            color: #2563eb;
+            border: 1px dashed #2563eb;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        .btn-add-product:hover {
+            background: #eff6ff;
+        }
+        .btn-add-product:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .empty-state-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        /* ── Footer Save Button ────────────────────────────────── */
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 8px;
+        }
+        .btn-save {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+        .btn-save:hover {
+            background: #1d4ed8;
+        }
+        .btn-save .material-icons-outlined {
+            font-size: 18px;
+        }
+
+        /* ── Responsive ────────────────────────────────────────── */
+        @media (max-width: 1100px) {
+            .form-layout {
+                flex-direction: column;
+            }
+            .form-side {
+                width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="page-body">
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main-area">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Top checkbox -->
+                <label class="top-checkbox">
+                    <input type="checkbox" id="chkXuatBo">
+                    Xuất bỏ sản phẩm
+                </label>
+
+                <!-- Two-column layout -->
+                <div class="form-layout">
+
+                    <!-- ══════════ LEFT COLUMN ══════════ -->
+                    <div class="form-main">
+
+                        <!-- Thong tin chung -->
+                        <div class="form-card">
+                            <div class="section-title">Thông tin chung</div>
+
+                            <!-- NEW: Don vi thue kho - highlighted -->
+                            <div class="highlight-wrapper" style="margin-bottom: 16px;">
+                                <span class="highlight-badge">Mới</span>
+                                <div class="form-group">
+                                    <label>Đơn vị thuê kho <span class="required">*</span></label>
+                                    <select class="form-input" id="tenantSelect" onchange="onTenantChange()">
+                                        <option value="">-- Chọn đơn vị thuê kho --</option>
+                                        <option value="KHO NAVIS">KHO NAVIS</option>
+                                        <option value="KHO LABEE">KHO LABEE</option>
+                                        <option value="KHO POTACHEM">KHO POTACHEM</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ngày tạo</label>
+                                    <input type="text" class="form-input" readonly id="fieldCreatedDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nhân viên giao nhận <span class="required">*</span></label>
+                                    <select class="form-input" id="fieldDelivery">
+                                        <option value="">-- Chọn --</option>
+                                        <option value="Lâm Minh Quý">Lâm Minh Quý</option>
+                                        <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                                        <option value="Gửi chuyển phát">Gửi chuyển phát</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nhân viên thủ kho <span class="required">*</span></label>
+                                    <select class="form-input" id="fieldWarehouseKeeper">
+                                        <option value="">-- Chọn --</option>
+                                        <option value="Trần Thị B">Trần Thị B</option>
+                                        <option value="Phạm Văn C">Phạm Văn C</option>
+                                        <option value="Lê Thị D">Lê Thị D</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày thực hiện <span class="required">*</span></label>
+                                    <input type="date" class="form-input" id="fieldDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thong tin khach hang -->
+                        <div class="form-card">
+                            <div class="section-title">Thông tin khách hàng</div>
+                            <div class="form-row form-row--full" style="margin-bottom: 12px;">
+                                <div class="form-group">
+                                    <label>Khách hàng:</label>
+                                    <input type="text" class="form-input" id="fieldCustomer" placeholder="Tìm kiếm khách hàng..." list="customerList" onchange="onCustomerChange()">
+                                    <datalist id="customerList">
+                                        <option value="CỔ PHẦN DƯỢC PHẨM HÀ TÂY">
+                                        <option value="DƯỢC PHẨM MINH DÂN">
+                                        <option value="DƯỢC PHẨM ĐẠT VI PHÚ">
+                                        <option value="DƯỢC PHẨM KHÁNH HÒA">
+                                        <option value="DƯỢC PHẨM IMEXPHARM">
+                                        <option value="CÔNG TY TNHH LABEE">
+                                        <option value="DƯỢC PHẨM EURO SANTÉ">
+                                        <option value="DƯỢC PHẨM RELIV">
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Mã số thuế:</label>
+                                    <div class="auto-text empty" id="taxCode">Chọn khách hàng để hiển thị</div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Địa chỉ:</label>
+                                    <div class="auto-text empty" id="customerAddress">Chọn khách hàng để hiển thị</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thong tin nhan hang -->
+                        <div class="form-card">
+                            <div class="section-title">Thông tin nhận hàng</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Người nhận hàng <span class="required">*</span></label>
+                                    <input type="text" class="form-input" id="fieldReceiver" placeholder="Nhập tên người nhận">
+                                </div>
+                                <div class="form-group">
+                                    <label>Số điện thoại <span class="required">*</span></label>
+                                    <input type="tel" class="form-input" id="fieldPhone" placeholder="Nhập số điện thoại">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Ngày giao dự kiến <span class="required">*</span></label>
+                                    <input type="date" class="form-input" id="fieldDeliveryDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Chứng từ thanh toán <span class="required">*</span></label>
+                                    <select class="form-input" id="fieldPaymentDoc">
+                                        <option value="">-- Chọn --</option>
+                                        <option value="Hóa đơn GTGT">Hóa đơn GTGT</option>
+                                        <option value="Phiếu xuất kho">Phiếu xuất kho</option>
+                                        <option value="Hóa đơn bán hàng">Hóa đơn bán hàng</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row form-row--full" style="margin-bottom: 12px;">
+                                <div class="form-group">
+                                    <label>Mã PO</label>
+                                    <input type="text" class="form-input" id="fieldPO" placeholder="Nhập mã PO (nếu có)">
+                                </div>
+                            </div>
+                            <div class="form-row form-row--full">
+                                <div class="form-group">
+                                    <label>Đ/c nhận hàng <span class="required">*</span></label>
+                                    <textarea class="form-input" id="fieldShipAddress" placeholder="Nhập địa chỉ nhận hàng"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- ══════════ END LEFT COLUMN ══════════ -->
+
+                    <!-- ══════════ RIGHT SIDEBAR PANEL ══════════ -->
+                    <div class="form-side">
+                        <div class="form-card">
+                            <div class="section-title">Thông tin vận chuyển</div>
+                            <div class="side-field">
+                                <label>Đơn vị v/c</label>
+                                <input type="text" class="form-input" id="fieldCarrier" placeholder="Nhập đơn vị vận chuyển">
+                            </div>
+                            <div class="side-field">
+                                <label>Mã vận đơn</label>
+                                <input type="text" class="form-input" id="fieldTrackingCode" placeholder="Nhập mã vận đơn">
+                            </div>
+                            <div class="side-field">
+                                <label>Số kiện hàng</label>
+                                <input type="text" class="form-input" id="fieldPackages" placeholder="Nhập số kiện">
+                            </div>
+                            <div class="side-field">
+                                <label>Khối lượng</label>
+                                <input type="text" class="form-input" id="fieldWeight" placeholder="kg">
+                            </div>
+                            <div class="side-field">
+                                <label>Cước phí</label>
+                                <input type="text" class="form-input" id="fieldShippingFee" placeholder="VNĐ">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ══════════ END RIGHT SIDEBAR ══════════ -->
+
+                </div>
+
+                <!-- ══════════ FULL-WIDTH: Product Table ══════════ -->
+                <div class="form-card">
+                    <div class="section-title-row">
+                        <div class="section-title">Danh sách sản phẩm</div>
+                        <button class="btn-add-product" id="btnAddProduct" onclick="addProductRow()" disabled>+ Thêm SP</button>
+                    </div>
+
+                    <div class="product-table-wrapper">
+                        <table class="product-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px" class="text-center">STT</th>
+                                    <th>Tên SP</th>
+                                    <th style="width:100px">Thương hiệu</th>
+                                    <th style="width:110px">Quy cách</th>
+                                    <th style="width:60px">ĐVT</th>
+                                    <th class="text-right" style="width:100px">Số lượng xuất</th>
+                                    <th class="text-center th-highlight" style="width:140px">
+                                        Vị trí xuất <span class="th-highlight-badge">Mới</span>
+                                    </th>
+                                    <th class="text-center" style="width:50px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody">
+                                <tr id="emptyRow">
+                                    <td colspan="8">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon"><span class="material-icons-outlined" style="font-size:36px;color:#ccc">inventory_2</span></div>
+                                            Vui lòng chọn đơn vị thuê kho trước
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer: LUU button -->
+                <div class="form-footer">
+                    <button class="btn-save" onclick="alert('Wireframe demo: Đã lưu phiếu xuất kho!')">
+                        <span class="material-icons-outlined">save</span>
+                        LƯU
+                    </button>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w10-danh-sach-xuat-kho.html', 'XUẤT KHO / TẠO XUẤT KHO');</script>
+    <script>
+        // ──────────────────────────────────────────────────────────
+        // Product data with brand, spec, and stock per location
+        // ──────────────────────────────────────────────────────────
+        var productData = {
+            'KHO NAVIS': [
+                { code: 'SP-NV001', name: 'Viên nang Glucosamine 500mg', brand: 'NAVIS', spec: '500mg x 60v', unit: 'Hộp', price: 45000,
+                  locations: [{ loc: 'B01.201.3', stock: 500 }, { loc: 'B01.302.1', stock: 400 }, { loc: 'B03.105.2', stock: 300 }] },
+                { code: 'SP-NV002', name: 'Siro Ho Bổ Phế', brand: 'NAVIS', spec: '100ml', unit: 'Chai', price: 32000,
+                  locations: [{ loc: 'B02.101.5', stock: 520 }, { loc: 'B02.203.1', stock: 280 }] },
+                { code: 'SP-NV003', name: 'Vitamin C 1000mg Effervescent', brand: 'NAVIS', spec: '10 viên/tuýp', unit: 'Tuýp', price: 28000,
+                  locations: [{ loc: 'B01.401.2', stock: 1000 }, { loc: 'B03.210.4', stock: 900 }, { loc: 'B05.108.1', stock: 600 }] },
+                { code: 'SP-NV004', name: 'Thuốc nhỏ mắt Natri Clorid 0.9%', brand: 'NAVIS', spec: '10ml', unit: 'Lọ', price: 12000,
+                  locations: [{ loc: 'B04.301.6', stock: 1800 }, { loc: 'B04.302.3', stock: 1200 }] }
+            ],
+            'KHO LABEE': [
+                { code: 'SP-LB001', name: 'Kem dưỡng da Labee Collagen', brand: 'LABEE', spec: '50g', unit: 'Hộp', price: 185000,
+                  locations: [{ loc: 'B06.102.1', stock: 300 }, { loc: 'B06.205.3', stock: 200 }] },
+                { code: 'SP-LB002', name: 'Serum Vitamin E Labee', brand: 'LABEE', spec: '30ml', unit: 'Chai', price: 125000,
+                  locations: [{ loc: 'B06.103.2', stock: 350 }] },
+                { code: 'SP-LB003', name: 'Sữa rửa mặt Labee Gentle', brand: 'LABEE', spec: '150ml', unit: 'Tuýp', price: 68000,
+                  locations: [{ loc: 'B07.201.4', stock: 500 }, { loc: 'B07.305.1', stock: 400 }] }
+            ],
+            'KHO POTACHEM': [
+                { code: 'SP-PC001', name: 'Dung dịch sát khuẩn Povidone', brand: 'POTACHEM', spec: '500ml', unit: 'Chai', price: 22000,
+                  locations: [{ loc: 'B10.101.2', stock: 800 }, { loc: 'B10.203.5', stock: 700 }] },
+                { code: 'SP-PC002', name: 'Cồn y tế 70 độ', brand: 'POTACHEM', spec: '500ml', unit: 'Chai', price: 15000,
+                  locations: [{ loc: 'B10.301.1', stock: 1200 }, { loc: 'B10.402.3', stock: 800 }] }
+            ]
+        };
+
+        // ──────────────────────────────────────────────────────────
+        // Customer mock data
+        // ──────────────────────────────────────────────────────────
+        var customerInfo = {
+            'CỔ PHẦN DƯỢC PHẨM HÀ TÂY': { tax: '0100115570', addr: '170 La Thành, Đống Đa, Hà Nội' },
+            'DƯỢC PHẨM MINH DÂN': { tax: '0312456789', addr: '45 Nguyễn Thị Minh Khai, Q.1, TP.HCM' },
+            'DƯỢC PHẨM ĐẠT VI PHÚ': { tax: '0305678123', addr: '88 Lý Thường Kiệt, Q.10, TP.HCM' },
+            'DƯỢC PHẨM KHÁNH HÒA': { tax: '4200123456', addr: '22 Trần Phú, Nha Trang, Khánh Hòa' },
+            'DƯỢC PHẨM IMEXPHARM': { tax: '1400567890', addr: '04 Đường 30/4, Cao Lãnh, Đồng Tháp' },
+            'CÔNG TY TNHH LABEE': { tax: '0317890123', addr: '120 Điện Biên Phủ, Q.Bình Thạnh, TP.HCM' },
+            'DƯỢC PHẨM EURO SANTÉ': { tax: '0309876543', addr: '55 Pasteur, Q.1, TP.HCM' },
+            'DƯỢC PHẨM RELIV': { tax: '0313579246', addr: '70 Bà Triệu, Q.Hai Bà Trưng, Hà Nội' }
+        };
+
+        // ──────────────────────────────────────────────────────────
+        // State
+        // ──────────────────────────────────────────────────────────
+        var rowCounter = 0;
+        var productRows = {}; // productRows[rid] = { productIdx, activeLocs: [locIdx, ...] }
+
+        // ──────────────────────────────────────────────────────────
+        // Init: set today's date
+        // ──────────────────────────────────────────────────────────
+        (function initDates() {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            document.getElementById('fieldCreatedDate').value = dd + '/' + mm + '/' + yyyy;
+            document.getElementById('fieldDate').value = yyyy + '-' + mm + '-' + dd;
+        })();
+
+        // ──────────────────────────────────────────────────────────
+        // Customer auto-fill
+        // ──────────────────────────────────────────────────────────
+        function onCustomerChange() {
+            var val = document.getElementById('fieldCustomer').value;
+            var info = customerInfo[val];
+            var taxEl = document.getElementById('taxCode');
+            var addrEl = document.getElementById('customerAddress');
+            if (info) {
+                taxEl.textContent = info.tax;
+                taxEl.className = 'auto-text';
+                addrEl.textContent = info.addr;
+                addrEl.className = 'auto-text';
+            } else {
+                taxEl.textContent = 'Chọn khách hàng để hiển thị';
+                taxEl.className = 'auto-text empty';
+                addrEl.textContent = 'Chọn khách hàng để hiển thị';
+                addrEl.className = 'auto-text empty';
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Tenant change
+        // ──────────────────────────────────────────────────────────
+        function onTenantChange() {
+            var tenant = document.getElementById('tenantSelect').value;
+            var tbody = document.getElementById('productTableBody');
+            var btnAdd = document.getElementById('btnAddProduct');
+
+            // Reset everything
+            tbody.innerHTML = '';
+            rowCounter = 0;
+            productRows = {};
+
+            if (!tenant) {
+                btnAdd.disabled = true;
+                tbody.innerHTML = '<tr id="emptyRow"><td colspan="8">' +
+                    '<div class="empty-state">' +
+                    '<div class="empty-state-icon"><span class="material-icons-outlined" style="font-size:36px;color:#ccc">inventory_2</span></div>' +
+                    'Vui lòng chọn đơn vị thuê kho trước' +
+                    '</div></td></tr>';
+            } else {
+                btnAdd.disabled = false;
+                tbody.innerHTML = '<tr id="emptyRow"><td colspan="8">' +
+                    '<div class="empty-state">' +
+                    '<div class="empty-state-icon"><span class="material-icons-outlined" style="font-size:36px;color:#4CAF50">check_circle</span></div>' +
+                    'Nhấn "+ Thêm SP" để thêm sản phẩm vào phiếu xuất' +
+                    '</div></td></tr>';
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Add product row
+        // ──────────────────────────────────────────────────────────
+        function addProductRow() {
+            var tenant = document.getElementById('tenantSelect').value;
+            if (!tenant) return;
+
+            var products = productData[tenant] || [];
+            var tbody = document.getElementById('productTableBody');
+
+            var emptyRow = document.getElementById('emptyRow');
+            if (emptyRow) emptyRow.remove();
+
+            rowCounter++;
+            var rid = rowCounter;
+            productRows[rid] = { productIdx: -1, activeLocs: [] };
+
+            // Build product select options
+            var optionsHTML = '<option value="">Chọn sản phẩm...</option>';
+            for (var i = 0; i < products.length; i++) {
+                optionsHTML += '<option value="' + i + '">' + products[i].code + ' - ' + products[i].name + '</option>';
+            }
+
+            // Main product row
+            var tr = document.createElement('tr');
+            tr.id = 'prow-' + rid;
+            tr.className = 'product-main-row';
+            tr.innerHTML =
+                '<td class="text-center" style="font-weight:700;color:#6b7280">' + rid + '</td>' +
+                '<td><select class="product-select" id="pselect-' + rid + '" onchange="onProductSelect(' + rid + ')">' + optionsHTML + '</select></td>' +
+                '<td><span id="brand-' + rid + '" style="color:#6b7280">--</span></td>' +
+                '<td><span id="spec-' + rid + '" style="color:#6b7280">--</span></td>' +
+                '<td><span id="unit-' + rid + '" style="color:#6b7280">--</span></td>' +
+                '<td class="text-right"><span id="totalqty-' + rid + '" style="font-weight:700">--</span></td>' +
+                '<td class="text-center"><span id="locinfo-' + rid + '" style="color:#9ca3af;font-size:12px">--</span></td>' +
+                '<td class="text-center"><button class="btn-delete-row" onclick="deleteProductRow(' + rid + ')" title="Xóa sản phẩm">&#10005;</button></td>';
+            tbody.appendChild(tr);
+
+            // Placeholder for location rows
+            var locPlaceholder = document.createElement('tr');
+            locPlaceholder.id = 'loc-placeholder-' + rid;
+            locPlaceholder.className = 'loc-row loc-placeholder';
+            locPlaceholder.innerHTML = '<td></td><td colspan="7" style="color:#9ca3af;font-size:12px;font-style:italic;padding-left:24px">Chọn sản phẩm để hiển thị vị trí kho</td>';
+            tbody.appendChild(locPlaceholder);
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Product selection
+        // ──────────────────────────────────────────────────────────
+        function onProductSelect(rid) {
+            var tenant = document.getElementById('tenantSelect').value;
+            var products = productData[tenant] || [];
+            var selectEl = document.getElementById('pselect-' + rid);
+            var idx = parseInt(selectEl.value);
+
+            // Remove old location rows
+            removeLocationRows(rid);
+
+            if (isNaN(idx)) {
+                document.getElementById('brand-' + rid).textContent = '--';
+                document.getElementById('spec-' + rid).textContent = '--';
+                document.getElementById('unit-' + rid).textContent = '--';
+                document.getElementById('totalqty-' + rid).textContent = '--';
+                document.getElementById('locinfo-' + rid).textContent = '--';
+                productRows[rid] = { productIdx: -1, activeLocs: [] };
+
+                // Re-add placeholder
+                var tbody = document.getElementById('productTableBody');
+                var mainRow = document.getElementById('prow-' + rid);
+                var locPlaceholder = document.createElement('tr');
+                locPlaceholder.id = 'loc-placeholder-' + rid;
+                locPlaceholder.className = 'loc-row loc-placeholder';
+                locPlaceholder.innerHTML = '<td></td><td colspan="7" style="color:#9ca3af;font-size:12px;font-style:italic;padding-left:24px">Chọn sản phẩm để hiển thị vị trí kho</td>';
+                insertAfter(locPlaceholder, mainRow);
+                return;
+            }
+
+            var p = products[idx];
+            productRows[rid] = { productIdx: idx, activeLocs: [] };
+
+            document.getElementById('brand-' + rid).textContent = p.brand;
+            document.getElementById('brand-' + rid).style.color = '#344054';
+            document.getElementById('spec-' + rid).textContent = p.spec;
+            document.getElementById('spec-' + rid).style.color = '#344054';
+            document.getElementById('unit-' + rid).textContent = p.unit;
+            document.getElementById('unit-' + rid).style.color = '#344054';
+            document.getElementById('totalqty-' + rid).textContent = '0';
+            updateLocInfo(rid);
+
+            // Add all location sub-rows
+            for (var li = 0; li < p.locations.length; li++) {
+                addLocationRow(rid, li);
+            }
+
+            // Add the "+ Thêm vị trí" row if not all shown
+            addLocAddRow(rid);
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Location rows
+        // ──────────────────────────────────────────────────────────
+        function addLocationRow(rid, locIdx) {
+            var tenant = document.getElementById('tenantSelect').value;
+            var products = productData[tenant] || [];
+            var pInfo = productRows[rid];
+            var p = products[pInfo.productIdx];
+            var loc = p.locations[locIdx];
+
+            pInfo.activeLocs.push(locIdx);
+
+            var tbody = document.getElementById('productTableBody');
+            var locId = 'locrow-' + rid + '-' + locIdx;
+
+            var tr = document.createElement('tr');
+            tr.id = locId;
+            tr.className = 'loc-row';
+            tr.innerHTML =
+                '<td></td>' +
+                '<td colspan="4" style="padding-left:24px">' +
+                    '<span class="loc-label">' +
+                        '<span class="loc-arrow">\u21B3</span>' +
+                        '<span class="loc-badge">' + loc.loc + '</span>' +
+                        '<span class="loc-stock">T\u1ED3n: <strong>' + loc.stock.toLocaleString('vi-VN') + '</strong></span>' +
+                    '</span>' +
+                '</td>' +
+                '<td class="text-right">' +
+                    '<input class="loc-qty-input" id="locqty-' + rid + '-' + locIdx + '" type="number" min="0" max="' + loc.stock + '" value="0" onchange="calcLocQty(' + rid + ')" oninput="calcLocQty(' + rid + ')">' +
+                '</td>' +
+                '<td class="text-center"><span class="loc-stock" id="locsub-' + rid + '-' + locIdx + '"></span></td>' +
+                '<td class="text-center"><button class="btn-remove-loc" onclick="removeLocRow(' + rid + ',' + locIdx + ')" title="B\u1ECF v\u1ECB tr\u00ED n\u00E0y">&#10005;</button></td>';
+
+            // Insert before the add-loc row or at end of product group
+            var addRow = document.getElementById('loc-add-' + rid);
+            if (addRow) {
+                tbody.insertBefore(tr, addRow);
+            } else {
+                insertAfter(tr, getLastRowOfProduct(rid));
+            }
+
+            updateLocInfo(rid);
+        }
+
+        function addLocAddRow(rid) {
+            var tenant = document.getElementById('tenantSelect').value;
+            var products = productData[tenant] || [];
+            var pInfo = productRows[rid];
+            var p = products[pInfo.productIdx];
+
+            // Remove existing add row
+            var existing = document.getElementById('loc-add-' + rid);
+            if (existing) existing.remove();
+
+            // If all locations already added, no button needed
+            if (pInfo.activeLocs.length >= p.locations.length) return;
+
+            var tbody = document.getElementById('productTableBody');
+            var tr = document.createElement('tr');
+            tr.id = 'loc-add-' + rid;
+            tr.className = 'loc-add-row';
+            tr.innerHTML =
+                '<td></td>' +
+                '<td colspan="7" style="padding-left:24px">' +
+                    '<button class="btn-add-loc" onclick="addMoreLoc(' + rid + ')">+ Thêm vị trí xuất khác</button>' +
+                '</td>';
+
+            var lastRow = getLastRowOfProduct(rid);
+            insertAfter(tr, lastRow);
+        }
+
+        function addMoreLoc(rid) {
+            var tenant = document.getElementById('tenantSelect').value;
+            var products = productData[tenant] || [];
+            var pInfo = productRows[rid];
+            var p = products[pInfo.productIdx];
+
+            // Find first available location not yet added
+            for (var i = 0; i < p.locations.length; i++) {
+                if (pInfo.activeLocs.indexOf(i) === -1) {
+                    addLocationRow(rid, i);
+                    addLocAddRow(rid);
+                    return;
+                }
+            }
+        }
+
+        function removeLocRow(rid, locIdx) {
+            var row = document.getElementById('locrow-' + rid + '-' + locIdx);
+            if (row) row.remove();
+
+            var pInfo = productRows[rid];
+            var idx = pInfo.activeLocs.indexOf(locIdx);
+            if (idx > -1) pInfo.activeLocs.splice(idx, 1);
+
+            addLocAddRow(rid);
+            calcLocQty(rid);
+            updateLocInfo(rid);
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Calculate quantities
+        // ──────────────────────────────────────────────────────────
+        function calcLocQty(rid) {
+            var tenant = document.getElementById('tenantSelect').value;
+            var products = productData[tenant] || [];
+            var pInfo = productRows[rid];
+            if (pInfo.productIdx < 0) return;
+
+            var p = products[pInfo.productIdx];
+            var totalQty = 0;
+
+            for (var i = 0; i < pInfo.activeLocs.length; i++) {
+                var li = pInfo.activeLocs[i];
+                var qtyEl = document.getElementById('locqty-' + rid + '-' + li);
+                var subEl = document.getElementById('locsub-' + rid + '-' + li);
+                if (!qtyEl || !subEl) continue;
+
+                var qty = parseInt(qtyEl.value) || 0;
+                // Validate max
+                if (qty > p.locations[li].stock) {
+                    qty = p.locations[li].stock;
+                    qtyEl.value = qty;
+                }
+                subEl.textContent = qty > 0 ? qty.toLocaleString('vi-VN') + ' ' + p.unit : '';
+                totalQty += qty;
+            }
+
+            document.getElementById('totalqty-' + rid).textContent = totalQty.toLocaleString('vi-VN');
+            document.getElementById('totalqty-' + rid).style.color = totalQty > 0 ? '#2563eb' : '#344054';
+        }
+
+        function updateLocInfo(rid) {
+            var pInfo = productRows[rid];
+            var el = document.getElementById('locinfo-' + rid);
+            if (!el) return;
+            if (pInfo.productIdx < 0) {
+                el.textContent = '--';
+                el.style.color = '#9ca3af';
+                return;
+            }
+            var tenant = document.getElementById('tenantSelect').value;
+            var products = productData[tenant] || [];
+            var p = products[pInfo.productIdx];
+            var total = p.locations.length;
+            var active = pInfo.activeLocs.length;
+            el.innerHTML = '<span style="color:#2563eb;font-weight:600">' + active + '</span><span style="color:#9ca3af">/' + total + ' vị trí</span>';
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Remove / delete
+        // ──────────────────────────────────────────────────────────
+        function removeLocationRows(rid) {
+            var pInfo = productRows[rid];
+            if (pInfo) {
+                for (var i = 0; i < pInfo.activeLocs.length; i++) {
+                    var row = document.getElementById('locrow-' + rid + '-' + pInfo.activeLocs[i]);
+                    if (row) row.remove();
+                }
+            }
+            var addRow = document.getElementById('loc-add-' + rid);
+            if (addRow) addRow.remove();
+            var placeholder = document.getElementById('loc-placeholder-' + rid);
+            if (placeholder) placeholder.remove();
+        }
+
+        function deleteProductRow(rid) {
+            removeLocationRows(rid);
+            var mainRow = document.getElementById('prow-' + rid);
+            if (mainRow) mainRow.remove();
+            delete productRows[rid];
+
+            // Check if table is empty
+            var tbody = document.getElementById('productTableBody');
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr id="emptyRow"><td colspan="8">' +
+                    '<div class="empty-state">' +
+                    '<div class="empty-state-icon"><span class="material-icons-outlined" style="font-size:36px;color:#4CAF50">check_circle</span></div>' +
+                    'Nhấn "+ Thêm SP" để thêm sản phẩm vào phiếu xuất' +
+                    '</div></td></tr>';
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // Utilities
+        // ──────────────────────────────────────────────────────────
+        function insertAfter(newNode, refNode) {
+            refNode.parentNode.insertBefore(newNode, refNode.nextSibling);
+        }
+
+        function getLastRowOfProduct(rid) {
+            var addRow = document.getElementById('loc-add-' + rid);
+            if (addRow) return addRow;
+
+            var pInfo = productRows[rid];
+            if (pInfo && pInfo.activeLocs.length > 0) {
+                var lastLocIdx = pInfo.activeLocs[pInfo.activeLocs.length - 1];
+                var lastLoc = document.getElementById('locrow-' + rid + '-' + lastLocIdx);
+                if (lastLoc) return lastLoc;
+            }
+
+            var placeholder = document.getElementById('loc-placeholder-' + rid);
+            if (placeholder) return placeholder;
+
+            return document.getElementById('prow-' + rid);
+        }
+    </script>
+</body>
+</html>

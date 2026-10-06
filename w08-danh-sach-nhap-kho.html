@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách nhập kho - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* ── Status Cards ─────────────────────────────────────────────── */
+        .status-cards {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-card {
+            flex: 1;
+            min-width: 180px;
+            border-radius: 10px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .status-card-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-card-count {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .status-card-amount {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .status-card--gray {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-card--blue {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-card--green {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-card--yellow {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde68a;
+        }
+
+        .status-card--dark {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid #334155;
+        }
+
+        .status-card--dark .status-card-amount {
+            color: #94a3b8;
+        }
+
+        /* ── Toolbar / Action Bar ─────────────────────────────────────── */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .btn-new-badge {
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 6px;
+            margin-left: 4px;
+            vertical-align: super;
+            text-transform: uppercase;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 240px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            margin-left: 8px;
+            color: #344054;
+        }
+
+        .search-box input::placeholder {
+            color: #98a2b3;
+        }
+
+        .search-icon {
+            color: #98a2b3;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .btn-icon {
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            color: #475569;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .btn-icon:hover {
+            background: #f3f4f6;
+        }
+
+        /* ── Table ────────────────────────────────────────────────────── */
+        .table-container {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475467;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .th-sort {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .th-sort:hover {
+            background: #f1f5f9;
+        }
+
+        .sort-arrows {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 10px;
+            color: #94a3b8;
+            vertical-align: middle;
+        }
+
+        /* Column filter inputs row */
+        .filter-row td {
+            padding: 6px 8px;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .filter-row input,
+        .filter-row select {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #333;
+            background: #fff;
+        }
+
+        .filter-row input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* Highlighted NEW column */
+        .col-new {
+            background: #eff6ff !important;
+        }
+
+        th.col-new {
+            background: #dbeafe !important;
+            position: relative;
+        }
+
+        th.col-new::after {
+            content: "MỚI";
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 4px;
+            margin-left: 5px;
+            vertical-align: super;
+        }
+
+        tbody td {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #344054;
+            border-bottom: 1px solid #f2f4f7;
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        tbody tr:hover td.col-new {
+            background: #e8f0fe !important;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-orange {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        .badge-yellow {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .badge-gray {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* Actions column */
+        .btn-more {
+            background: none;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #475569;
+            line-height: 1;
+            transition: background 0.15s;
+        }
+
+        .btn-more:hover {
+            background: #f3f4f6;
+        }
+
+        /* ── Pagination ───────────────────────────────────────────────── */
+        .table-pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #667085;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .table-pagination select {
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 13px;
+            color: #344054;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .page-btn {
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            color: #475569;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .page-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Link style for codes */
+        .code-link {
+            color: #2563eb;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .code-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main-area">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Status Cards -->
+                <div class="status-cards">
+                    <div class="status-card status-card--gray">
+                        <span class="status-card-label">Chưa thực hiện</span>
+                        <span class="status-card-count">--</span>
+                        <span class="status-card-amount">0 VNĐ</span>
+                    </div>
+                    <div class="status-card status-card--blue">
+                        <span class="status-card-label">Đang thực hiện</span>
+                        <span class="status-card-count">5</span>
+                        <span class="status-card-amount">473,079,047 VNĐ</span>
+                    </div>
+                    <div class="status-card status-card--green">
+                        <span class="status-card-label">Đã nhận hàng</span>
+                        <span class="status-card-count">--</span>
+                        <span class="status-card-amount">0 VNĐ</span>
+                    </div>
+                    <div class="status-card status-card--yellow">
+                        <span class="status-card-label">Chờ scan</span>
+                        <span class="status-card-count">--</span>
+                        <span class="status-card-amount">0 VNĐ</span>
+                    </div>
+                    <div class="status-card status-card--dark">
+                        <span class="status-card-label">Đã nhập kho</span>
+                        <span class="status-card-count">7,713</span>
+                        <span class="status-card-amount">160,808,366,061 VNĐ</span>
+                    </div>
+                </div>
+
+                <!-- Action Bar / Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <a href="w09-tao-phieu-nhap-kho.html" class="btn btn-primary" style="border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600;">
+                            + TẠO PHIẾU NHẬP KHO
+                        </a>
+                        <button class="btn-outline">
+                            &#8681; Tải mẫu phiếu
+                            <span class="btn-new-badge">MỚI</span>
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="search-box">
+                            <span class="search-icon">&#128269;</span>
+                            <input type="text" placeholder="Tìm kiếm..." id="searchInput">
+                        </div>
+                        <button class="btn-icon" title="Bộ lọc">&#9776;</button>
+                        <button class="btn-icon" title="Làm mới">&#8635;</button>
+                        <button class="btn-icon" title="Tải lại">&#8634;</button>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="th-sort">NGÀY THỰC HIỆN <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th class="th-sort col-new">TÊN CÔNG TY</th>
+                                <th class="th-sort">TRẠNG THÁI <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th class="th-sort">MÃ NHẬP KHO <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th class="th-sort">NGÀY NHẬP KHO <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th class="th-sort">TÊN NHÀ CUNG CẤP <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th class="th-sort">GIÁ TRỊ NHẬP KHO <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th class="th-sort">Nhân viên lấy hàng <span class="sort-arrows">&#9650;&#9660;</span></th>
+                                <th style="width:50px;"></th>
+                            </tr>
+                            <!-- Filter inputs row -->
+                            <tr class="filter-row">
+                                <td><input type="text" placeholder="dd/mm/yyyy"></td>
+                                <td class="col-new">
+                                    <select>
+                                        <option value="">Tất cả &#9660;</option>
+                                        <option>KHO NAVIS</option>
+                                        <option>KHO LABEE</option>
+                                        <option>KHO POTACHEM</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" placeholder="Lọc..."></td>
+                                <td><input type="text" placeholder="Lọc..."></td>
+                                <td><input type="text" placeholder="dd/mm/yyyy"></td>
+                                <td><input type="text" placeholder="Lọc..."></td>
+                                <td><input type="text" placeholder="Lọc..."></td>
+                                <td><input type="text" placeholder="Lọc..."></td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td>06/10/2026</td>
+                                <td class="col-new">KHO NAVIS</td>
+                                <td><span class="badge badge-orange">Đang thực hiện</span></td>
+                                <td><span class="code-link">NK26-21622</span></td>
+                                <td>__</td>
+                                <td>SYNZEAL RESEARCH</td>
+                                <td style="text-align:right;">292,635,720</td>
+                                <td>Lâm Minh Quý</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2026</td>
+                                <td class="col-new">KHO NAVIS</td>
+                                <td><span class="badge badge-green">Đã nhập kho</span></td>
+                                <td><span class="code-link">NK26-21617</span></td>
+                                <td>05/10/2026</td>
+                                <td>CỔ PHẦN THIẾT BỊ ĐỆ NHẤT</td>
+                                <td style="text-align:right;">8,640,000</td>
+                                <td>Gửi chuyển phát</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2026</td>
+                                <td class="col-new">KHO LABEE</td>
+                                <td><span class="badge badge-green">Đã nhập kho</span></td>
+                                <td><span class="code-link">NK26-21614</span></td>
+                                <td>05/10/2026</td>
+                                <td>CỔ PHẦN THƯƠNG MẠI HÀ PHAN</td>
+                                <td style="text-align:right;">2,721,600</td>
+                                <td>Lâm Minh Quý</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2026</td>
+                                <td class="col-new">KHO NAVIS</td>
+                                <td><span class="badge badge-orange">Đang thực hiện</span></td>
+                                <td><span class="code-link">NK26-21613</span></td>
+                                <td>__</td>
+                                <td>PROLAB</td>
+                                <td style="text-align:right;">1,829,158</td>
+                                <td>Gửi chuyển phát</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2026</td>
+                                <td class="col-new">KHO LABEE</td>
+                                <td><span class="badge badge-green">Đã nhập kho</span></td>
+                                <td><span class="code-link">NK26-21603</span></td>
+                                <td>05/10/2026</td>
+                                <td>CÔNG TY TNHH LABEE</td>
+                                <td style="text-align:right;">13,344,480</td>
+                                <td>Gửi chuyển phát</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2026</td>
+                                <td class="col-new">KHO POTACHEM</td>
+                                <td><span class="badge badge-green">Đã nhập kho</span></td>
+                                <td><span class="code-link">NK26-21600</span></td>
+                                <td>05/10/2026</td>
+                                <td>HÓA CHẤT TP.HCM</td>
+                                <td style="text-align:right;">3,510,000</td>
+                                <td>Lâm Minh Quý</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>02/10/2026</td>
+                                <td class="col-new">KHO NAVIS</td>
+                                <td><span class="badge badge-green">Đã nhập kho</span></td>
+                                <td><span class="code-link">NK26-21599</span></td>
+                                <td>02/10/2026</td>
+                                <td>CỔ PHẦN THIẾT BỊ ĐỆ NHẤT</td>
+                                <td style="text-align:right;">3,499,200</td>
+                                <td>Gửi chuyển phát</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                            <tr>
+                                <td>02/10/2026</td>
+                                <td class="col-new">KHO LABEE</td>
+                                <td><span class="badge badge-green">Đã nhập kho</span></td>
+                                <td><span class="code-link">NK26-21596</span></td>
+                                <td>02/10/2026</td>
+                                <td>CÔNG TY TNHH LABEE</td>
+                                <td style="text-align:right;">309,960</td>
+                                <td>Gửi chuyển phát</td>
+                                <td><button class="btn-more" title="Thêm hành động">&#8942;</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="table-pagination">
+                        <span>Số hàng mỗi trang:</span>
+                        <select>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span>1-20 trong 7785</span>
+                        <button class="page-btn" disabled>&lt;</button>
+                        <button class="page-btn">&gt;</button>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w08-danh-sach-nhap-kho.html', 'NHẬP KHO');</script>
+    <script>
+        // Search filter
+        document.getElementById('searchInput').addEventListener('input', function() {
+            var filter = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

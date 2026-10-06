@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu vị trí - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* Page-specific styles */
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475467;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 9px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #344054;
+            background: #fff;
+            min-width: 170px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .filter-group input::placeholder {
+            color: #98a2b3;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            margin-left: auto;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #344054;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+        /* Table */
+        .table-container {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475467;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        thead th:first-child {
+            text-align: center;
+            width: 60px;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #344054;
+            border-bottom: 1px solid #f2f4f7;
+        }
+
+        tbody td:first-child {
+            text-align: center;
+            color: #98a2b3;
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: #f0f5ff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Capacity bar */
+        .capacity-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .capacity-bar {
+            width: 80px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .capacity-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .capacity-bar-fill.green {
+            background: #22c55e;
+        }
+
+        .capacity-bar-fill.yellow {
+            background: #eab308;
+        }
+
+        .capacity-bar-fill.red {
+            background: #ef4444;
+        }
+
+        .capacity-bar-fill.gray {
+            background: #9ca3af;
+        }
+
+        .capacity-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475467;
+            min-width: 36px;
+        }
+
+        /* Action buttons */
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            border: 1px solid #2563eb;
+            background: #fff;
+            color: #2563eb;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-action:hover {
+            background: #eff6ff;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #667085;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .pagination select {
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 13px;
+            color: #344054;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .pagination button {
+            padding: 4px 10px;
+            font-size: 13px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            background: #fff;
+            color: #344054;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .pagination button:hover {
+            background: #f9fafb;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Result count */
+        .result-count {
+            font-size: 13px;
+            color: #667085;
+            margin-bottom: 12px;
+        }
+
+        .result-count strong {
+            color: #344054;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label>Đơn vị thuê kho</label>
+                        <select id="filterTenant">
+                            <option value="">Tất cả</option>
+                            <option value="KHO NAVIS">KHO NAVIS</option>
+                            <option value="KHO LABEE">KHO LABEE</option>
+                            <option value="KHO POTACHEM">KHO POTACHEM</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Mã sản phẩm</label>
+                        <input type="text" id="filterProductCode" placeholder="Nhập mã sản phẩm...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Mã LOT</label>
+                        <input type="text" id="filterLot" placeholder="Nhập mã LOT...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Tên sản phẩm</label>
+                        <input type="text" id="filterProductName" placeholder="Nhập tên sản phẩm...">
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn-primary" id="btnSearch" onclick="filterTable()">
+                            &#128269; Tìm kiếm
+                        </button>
+                        <button class="btn-outline" onclick="resetFilters()">
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result count -->
+                <div class="result-count" id="resultCount">
+                    Hiển thị <strong id="visibleCount">10</strong> / <strong>10</strong> kết quả
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã vị trí</th>
+                                <th>Khu vực</th>
+                                <th>Đơn vị thuê</th>
+                                <th>Nhóm SP</th>
+                                <th>Sức chứa</th>
+                                <th>Số SP</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr data-tenant="KHO NAVIS">
+                                <td>1</td>
+                                <td>B06.301.1</td>
+                                <td>Room 1</td>
+                                <td>KHO NAVIS</td>
+                                <td>Hóa chất phân tích</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill yellow" style="width: 75%"></div>
+                                        </div>
+                                        <span class="capacity-label">75%</span>
+                                    </div>
+                                </td>
+                                <td>3</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO NAVIS">
+                                <td>2</td>
+                                <td>B06.502.1</td>
+                                <td>Room 1</td>
+                                <td>KHO NAVIS</td>
+                                <td>Dung môi</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill green" style="width: 25%"></div>
+                                        </div>
+                                        <span class="capacity-label">25%</span>
+                                    </div>
+                                </td>
+                                <td>5</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO LABEE">
+                                <td>3</td>
+                                <td>B04.201.1</td>
+                                <td>Room 2</td>
+                                <td>KHO LABEE</td>
+                                <td>Dược phẩm</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill green" style="width: 50%"></div>
+                                        </div>
+                                        <span class="capacity-label">50%</span>
+                                    </div>
+                                </td>
+                                <td>2</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO LABEE">
+                                <td>4</td>
+                                <td>B04.202.2</td>
+                                <td>Room 2</td>
+                                <td>KHO LABEE</td>
+                                <td>Mỹ phẩm</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill red" style="width: 100%"></div>
+                                        </div>
+                                        <span class="capacity-label">100%</span>
+                                    </div>
+                                </td>
+                                <td>8</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO POTACHEM">
+                                <td>5</td>
+                                <td>B08.101.1</td>
+                                <td>Room 1</td>
+                                <td>KHO POTACHEM</td>
+                                <td>Hóa chất công nghiệp</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill gray" style="width: 0%"></div>
+                                        </div>
+                                        <span class="capacity-label">0%</span>
+                                    </div>
+                                </td>
+                                <td>0</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO NAVIS">
+                                <td>6</td>
+                                <td>B06.303.2</td>
+                                <td>Room 1</td>
+                                <td>KHO NAVIS</td>
+                                <td>Thuốc thử</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill green" style="width: 40%"></div>
+                                        </div>
+                                        <span class="capacity-label">40%</span>
+                                    </div>
+                                </td>
+                                <td>4</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO LABEE">
+                                <td>7</td>
+                                <td>B04.105.1</td>
+                                <td>Room 2</td>
+                                <td>KHO LABEE</td>
+                                <td>Thực phẩm chức năng</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill yellow" style="width: 60%"></div>
+                                        </div>
+                                        <span class="capacity-label">60%</span>
+                                    </div>
+                                </td>
+                                <td>6</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO POTACHEM">
+                                <td>8</td>
+                                <td>B08.203.1</td>
+                                <td>Room 1</td>
+                                <td>KHO POTACHEM</td>
+                                <td>Phụ gia</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill green" style="width: 30%"></div>
+                                        </div>
+                                        <span class="capacity-label">30%</span>
+                                    </div>
+                                </td>
+                                <td>1</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO NAVIS">
+                                <td>9</td>
+                                <td>B06.401.1</td>
+                                <td>Room 1</td>
+                                <td>KHO NAVIS</td>
+                                <td>Hóa chất phân tích</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill red" style="width: 90%"></div>
+                                        </div>
+                                        <span class="capacity-label">90%</span>
+                                    </div>
+                                </td>
+                                <td>7</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                            <tr data-tenant="KHO POTACHEM">
+                                <td>10</td>
+                                <td>B08.302.2</td>
+                                <td>Room 2</td>
+                                <td>KHO POTACHEM</td>
+                                <td>Dung môi công nghiệp</td>
+                                <td>
+                                    <div class="capacity-bar-wrap">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill green" style="width: 15%"></div>
+                                        </div>
+                                        <span class="capacity-label">15%</span>
+                                    </div>
+                                </td>
+                                <td>2</td>
+                                <td><a href="w04-chi-tiet-vi-tri.html" class="btn-action">Xem</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="pagination">
+                        <span>Số hàng mỗi trang:</span>
+                        <select>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span id="paginationInfo">1-10 trong 10</span>
+                        <button disabled>&laquo;</button>
+                        <button disabled>&lsaquo;</button>
+                        <button disabled>&rsaquo;</button>
+                        <button disabled>&raquo;</button>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w03-so-do-kho.html', 'QUẢN LÝ SẢN PHẨM / TRA CỨU VỊ TRÍ');</script>
+    <script>
+        // Filter table based on dropdown and text inputs
+        function filterTable() {
+            var tenantFilter = document.getElementById('filterTenant').value;
+            var productCodeFilter = document.getElementById('filterProductCode').value.trim().toLowerCase();
+            var lotFilter = document.getElementById('filterLot').value.trim().toLowerCase();
+            var productNameFilter = document.getElementById('filterProductName').value.trim().toLowerCase();
+
+            var rows = document.querySelectorAll('#tableBody tr');
+            var visibleCount = 0;
+            var stt = 0;
+
+            rows.forEach(function(row) {
+                var tenant = row.getAttribute('data-tenant') || '';
+                var cells = row.querySelectorAll('td');
+                var locationCode = cells[1] ? cells[1].textContent.toLowerCase() : '';
+                var productGroup = cells[4] ? cells[4].textContent.toLowerCase() : '';
+                var rowText = row.textContent.toLowerCase();
+
+                var matchTenant = !tenantFilter || tenant === tenantFilter;
+                var matchProductCode = !productCodeFilter || locationCode.indexOf(productCodeFilter) !== -1 || rowText.indexOf(productCodeFilter) !== -1;
+                var matchLot = !lotFilter || rowText.indexOf(lotFilter) !== -1;
+                var matchProductName = !productNameFilter || productGroup.indexOf(productNameFilter) !== -1 || rowText.indexOf(productNameFilter) !== -1;
+
+                if (matchTenant && matchProductCode && matchLot && matchProductName) {
+                    row.style.display = '';
+                    visibleCount++;
+                    stt++;
+                    cells[0].textContent = stt;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('visibleCount').textContent = visibleCount;
+            document.getElementById('paginationInfo').textContent = visibleCount > 0
+                ? '1-' + visibleCount + ' trong ' + visibleCount
+                : '0 kết quả';
+        }
+
+        // Reset all filters
+        function resetFilters() {
+            document.getElementById('filterTenant').value = '';
+            document.getElementById('filterProductCode').value = '';
+            document.getElementById('filterLot').value = '';
+            document.getElementById('filterProductName').value = '';
+
+            var rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(function(row, index) {
+                row.style.display = '';
+                row.querySelectorAll('td')[0].textContent = index + 1;
+            });
+
+            document.getElementById('visibleCount').textContent = rows.length;
+            document.getElementById('paginationInfo').textContent = '1-' + rows.length + ' trong ' + rows.length;
+        }
+
+        // Allow Enter key to trigger search
+        document.querySelectorAll('.filter-bar input').forEach(function(input) {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    filterTable();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

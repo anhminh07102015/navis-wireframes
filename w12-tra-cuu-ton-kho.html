@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu tồn kho - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* Page-specific styles */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-excel {
+            background: #16a34a;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-excel:hover {
+            background: #15803d;
+        }
+
+        /* Dropdown button for NXT */
+        .dropdown-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: #374151;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+            min-width: 180px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #344054;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+
+        .dropdown-menu a:hover {
+            background: #f0f5ff;
+            text-decoration: none;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 260px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            margin-left: 8px;
+            color: #344054;
+        }
+
+        .search-box input::placeholder {
+            color: #98a2b3;
+        }
+
+        .search-icon {
+            color: #98a2b3;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .btn-icon {
+            background: #fff;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 16px;
+            cursor: pointer;
+            color: #475467;
+            transition: background 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: #f9fafb;
+        }
+
+        /* Table */
+        .table-container {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        thead th {
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475467;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+            background: #f9fafb;
+            position: relative;
+        }
+
+        thead th.col-new {
+            background: #eff6ff;
+        }
+
+        thead th .sort-arrow {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-left: 4px;
+        }
+
+        /* Filter row */
+        .filter-row th {
+            padding: 6px 8px;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .filter-row th.col-new {
+            background: #eff6ff;
+        }
+
+        .filter-row input,
+        .filter-row select {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #d0d5dd;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #344054;
+            background: #fff;
+        }
+
+        .filter-row input::placeholder {
+            color: #c0c5cc;
+        }
+
+        tbody td {
+            padding: 10px 12px;
+            font-size: 13px;
+            color: #344054;
+            border-bottom: 1px solid #f2f4f7;
+            white-space: nowrap;
+        }
+
+        tbody td.col-new {
+            background: #f8fbff;
+        }
+
+        tbody tr {
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover td {
+            background: #f0f5ff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-green {
+            background: #ecfdf3;
+            color: #027a48;
+        }
+
+        .badge-red {
+            background: #fef3f2;
+            color: #b42318;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        /* Note under table */
+        .table-note {
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #6b7280;
+            font-style: italic;
+            border-top: 1px solid #f2f4f7;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #667085;
+            gap: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .pagination select {
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 13px;
+            color: #344054;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        /* NEW label */
+        .label-new {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-left: 4px;
+            vertical-align: middle;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <button class="btn-excel">
+                            &#11015; Tải file excel
+                        </button>
+                        <div class="dropdown-wrap" id="dropdownNXT">
+                            <button class="btn-outline" onclick="toggleDropdown()">
+                                &#128196; Tải file NXT theo đơn vị <span class="label-new">NEW</span> &#9662;
+                            </button>
+                            <div class="dropdown-menu" id="nxtDropdown">
+                                <a href="#" onclick="downloadNXT('NAVIS')">NAVIS</a>
+                                <a href="#" onclick="downloadNXT('LABEE')">LABEE</a>
+                                <a href="#" onclick="downloadNXT('POTACHEM')">POTACHEM</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="search-box">
+                            <span class="search-icon">&#128269;</span>
+                            <input type="text" placeholder="Tìm kiếm..." id="searchInput">
+                        </div>
+                        <button class="btn-icon" title="Biểu đồ">&#128202;</button>
+                        <button class="btn-icon" title="Làm mới" onclick="location.reload()">&#8635;</button>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="col-new">TÊN CÔNG TY <span class="label-new">NEW</span> <span class="sort-arrow">&#8597;</span></th>
+                                    <th>TRẠNG THÁI <span class="sort-arrow">&#8597;</span></th>
+                                    <th class="col-new">MÃ CAS <span class="label-new">NEW</span> <span class="sort-arrow">&#8597;</span></th>
+                                    <th>MÃ SẢN PHẨM <span class="sort-arrow">&#8597;</span></th>
+                                    <th>TÊN SẢN PHẨM <span class="sort-arrow">&#8597;</span></th>
+                                    <th>THƯƠNG HIỆU <span class="sort-arrow">&#8597;</span></th>
+                                    <th>XUẤT XỨ <span class="sort-arrow">&#8597;</span></th>
+                                    <th>QUY CÁCH <span class="sort-arrow">&#8597;</span></th>
+                                    <th class="col-new text-right">TỔNG ĐÃ NHẬP <span class="label-new">NEW</span> <span class="sort-arrow">&#8597;</span></th>
+                                    <th class="col-new text-right">TỔNG ĐÃ XUẤT <span class="label-new">NEW</span> <span class="sort-arrow">&#8597;</span></th>
+                                    <th class="text-right">SL TRONG KHO <span class="sort-arrow">&#8597;</span></th>
+                                </tr>
+                                <!-- Filter row -->
+                                <tr class="filter-row">
+                                    <th class="col-new">
+                                        <select id="filterCompany" onchange="filterByCompany()">
+                                            <option value="">Tất cả</option>
+                                            <option value="NAVIS">NAVIS</option>
+                                            <option value="LABEE">LABEE</option>
+                                            <option value="POTACHEM">POTACHEM</option>
+                                        </select>
+                                    </th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="1"></th>
+                                    <th class="col-new"><input type="text" placeholder="Lọc..." class="col-filter" data-col="2"></th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="3"></th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="4"></th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="5"></th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="6"></th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="7"></th>
+                                    <th class="col-new"><input type="text" placeholder="Lọc..." class="col-filter" data-col="8"></th>
+                                    <th class="col-new"><input type="text" placeholder="Lọc..." class="col-filter" data-col="9"></th>
+                                    <th><input type="text" placeholder="Lọc..." class="col-filter" data-col="10"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr data-company="NAVIS">
+                                    <td class="col-new">NAVIS</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">1310-73-2</td>
+                                    <td>SP-0012</td>
+                                    <td>Sodium Hydroxide NaOH 99%</td>
+                                    <td>Merck</td>
+                                    <td>Đức</td>
+                                    <td>500g/chai</td>
+                                    <td class="col-new text-right">150</td>
+                                    <td class="col-new text-right">120</td>
+                                    <td class="text-right">30</td>
+                                </tr>
+                                <tr data-company="NAVIS">
+                                    <td class="col-new">NAVIS</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">7647-01-0</td>
+                                    <td>SP-0045</td>
+                                    <td>Hydrochloric Acid HCl 37%</td>
+                                    <td>Sigma-Aldrich</td>
+                                    <td>Mỹ</td>
+                                    <td>2.5L/chai</td>
+                                    <td class="col-new text-right">80</td>
+                                    <td class="col-new text-right">65</td>
+                                    <td class="text-right">15</td>
+                                </tr>
+                                <tr data-company="NAVIS">
+                                    <td class="col-new">NAVIS</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">64-17-5</td>
+                                    <td>SP-0078</td>
+                                    <td>Ethanol 96%</td>
+                                    <td>Merck</td>
+                                    <td>Đức</td>
+                                    <td>1L/chai</td>
+                                    <td class="col-new text-right">200</td>
+                                    <td class="col-new text-right">180</td>
+                                    <td class="text-right">20</td>
+                                </tr>
+                                <tr data-company="LABEE">
+                                    <td class="col-new">LABEE</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">7732-18-5</td>
+                                    <td>SP-0156</td>
+                                    <td>Nước cất 2 lần</td>
+                                    <td>LabChem</td>
+                                    <td>Việt Nam</td>
+                                    <td>5L/can</td>
+                                    <td class="col-new text-right">500</td>
+                                    <td class="col-new text-right">480</td>
+                                    <td class="text-right">20</td>
+                                </tr>
+                                <tr data-company="LABEE">
+                                    <td class="col-new">LABEE</td>
+                                    <td><span class="badge badge-red">Ngưng bán</span></td>
+                                    <td class="col-new">67-56-1</td>
+                                    <td>SP-0189</td>
+                                    <td>Methanol HPLC Grade</td>
+                                    <td>Fisher</td>
+                                    <td>Mỹ</td>
+                                    <td>4L/chai</td>
+                                    <td class="col-new text-right">100</td>
+                                    <td class="col-new text-right">100</td>
+                                    <td class="text-right">0</td>
+                                </tr>
+                                <tr data-company="NAVIS">
+                                    <td class="col-new">NAVIS</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">7664-93-9</td>
+                                    <td>SP-0201</td>
+                                    <td>Sulfuric Acid H2SO4 98%</td>
+                                    <td>Merck</td>
+                                    <td>Đức</td>
+                                    <td>2.5L/chai</td>
+                                    <td class="col-new text-right">60</td>
+                                    <td class="col-new text-right">45</td>
+                                    <td class="text-right">15</td>
+                                </tr>
+                                <tr data-company="POTACHEM">
+                                    <td class="col-new">POTACHEM</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">7681-52-9</td>
+                                    <td>SP-0234</td>
+                                    <td>Sodium Hypochlorite 12%</td>
+                                    <td>Potachem</td>
+                                    <td>Việt Nam</td>
+                                    <td>25L/can</td>
+                                    <td class="col-new text-right">300</td>
+                                    <td class="col-new text-right">250</td>
+                                    <td class="text-right">50</td>
+                                </tr>
+                                <tr data-company="NAVIS">
+                                    <td class="col-new">NAVIS</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">7440-44-0</td>
+                                    <td>SP-0267</td>
+                                    <td>Activated Carbon</td>
+                                    <td>Norit</td>
+                                    <td>Hà Lan</td>
+                                    <td>25kg/bao</td>
+                                    <td class="col-new text-right">40</td>
+                                    <td class="col-new text-right">30</td>
+                                    <td class="text-right">10</td>
+                                </tr>
+                                <tr data-company="LABEE">
+                                    <td class="col-new">LABEE</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">77-92-9</td>
+                                    <td>SP-0312</td>
+                                    <td>Citric Acid Monohydrate</td>
+                                    <td>Weifang</td>
+                                    <td>Trung Quốc</td>
+                                    <td>25kg/bao</td>
+                                    <td class="col-new text-right">120</td>
+                                    <td class="col-new text-right">90</td>
+                                    <td class="text-right">30</td>
+                                </tr>
+                                <tr data-company="POTACHEM">
+                                    <td class="col-new">POTACHEM</td>
+                                    <td><span class="badge badge-green">Đang bán</span></td>
+                                    <td class="col-new">497-19-8</td>
+                                    <td>SP-0345</td>
+                                    <td>Sodium Carbonate Na2CO3</td>
+                                    <td>Tata</td>
+                                    <td>Ấn Độ</td>
+                                    <td>50kg/bao</td>
+                                    <td class="col-new text-right">80</td>
+                                    <td class="col-new text-right">60</td>
+                                    <td class="text-right">20</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-note">
+                        Chỉ hiển thị sản phẩm đã từng nhập kho
+                    </div>
+                    <div class="pagination">
+                        <span>Số hàng mỗi trang:</span>
+                        <select>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span>1-10 trong 450</span>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w12-tra-cuu-ton-kho.html', 'QUẢN LÝ SẢN PHẨM / TRA CỨU TỒN KHO');</script>
+    <script>
+        // Toggle NXT dropdown
+        function toggleDropdown() {
+            var menu = document.getElementById('nxtDropdown');
+            menu.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            var wrap = document.getElementById('dropdownNXT');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('nxtDropdown').classList.remove('show');
+            }
+        });
+
+        // Download NXT handler
+        function downloadNXT(company) {
+            alert('Wireframe demo: Tải file NXT cho đơn vị "' + company + '"');
+            document.getElementById('nxtDropdown').classList.remove('show');
+        }
+
+        // Filter by company dropdown
+        function filterByCompany() {
+            var selected = document.getElementById('filterCompany').value;
+            var rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(function(row) {
+                if (!selected || row.getAttribute('data-company') === selected) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Global search
+        document.getElementById('searchInput').addEventListener('input', function() {
+            var filter = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+
+        // Column filter inputs
+        document.querySelectorAll('.col-filter').forEach(function(input) {
+            input.addEventListener('input', function() {
+                var colIndex = parseInt(this.getAttribute('data-col'));
+                var filter = this.value.toLowerCase();
+                var rows = document.querySelectorAll('#tableBody tr');
+                rows.forEach(function(row) {
+                    var cell = row.querySelectorAll('td')[colIndex];
+                    if (cell) {
+                        var text = cell.textContent.toLowerCase();
+                        if (!text.includes(filter)) {
+                            row.style.display = 'none';
+                        } else if (row.style.display === 'none') {
+                            // Re-check all filters before showing
+                            var show = true;
+                            document.querySelectorAll('.col-filter').forEach(function(f) {
+                                var ci = parseInt(f.getAttribute('data-col'));
+                                var fv = f.value.toLowerCase();
+                                if (fv) {
+                                    var c = row.querySelectorAll('td')[ci];
+                                    if (c && !c.textContent.toLowerCase().includes(fv)) {
+                                        show = false;
+                                    }
+                                }
+                            });
+                            // Also check company filter
+                            var companyFilter = document.getElementById('filterCompany').value;
+                            if (companyFilter && row.getAttribute('data-company') !== companyFilter) {
+                                show = false;
+                            }
+                            row.style.display = show ? '' : 'none';
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

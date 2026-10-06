@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo nhập kho - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* ── Section headers - blue text like live site ────────────────── */
+        .section-title-blue {
+            color: #0277bd;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* ── Two-column main layout ───────────────────────────────────── */
+        .form-layout {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .form-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-side {
+            width: 300px;
+            flex-shrink: 0;
+        }
+
+        /* ── Form card - flat white, subtle borders ───────────────────── */
+        .form-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* ── Top checkbox ─────────────────────────────────────────────── */
+        .top-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #344054;
+            cursor: pointer;
+        }
+
+        .top-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+
+        /* ── Form grid ────────────────────────────────────────────────── */
+        .form-row-custom {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .form-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #757575;
+            margin-bottom: 6px;
+        }
+
+        .form-group label .required {
+            color: #dc2626;
+            margin-left: 2px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #c4c4c4;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #344054;
+            background: #fff;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        select.form-input {
+            appearance: auto;
+            cursor: pointer;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ── Supplier info display ────────────────────────────────────── */
+        .supplier-info {
+            display: flex;
+            gap: 40px;
+            margin-top: 12px;
+        }
+
+        .supplier-info-col {
+            flex: 1;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: #757575;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        .info-value {
+            color: #344054;
+            margin-left: 4px;
+        }
+
+        /* ── Highlighted new field ────────────────────────────────────── */
+        .field-new {
+            position: relative;
+        }
+
+        .field-new .form-group-wrapper {
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 12px;
+            background: #eff6ff;
+        }
+
+        .badge-new {
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 6px;
+            vertical-align: middle;
+            text-transform: uppercase;
+        }
+
+        /* ── Product Section ──────────────────────────────────────────── */
+        .product-section {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .btn-add-product {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s;
+        }
+
+        .btn-add-product:hover {
+            background: #1d4ed8;
+        }
+
+        .product-table-wrapper {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* ── Product Table - dark navy header like live site ──────────── */
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .product-table thead {
+            background: #1a3353;
+        }
+
+        .product-table thead th {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 10px 12px;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: none;
+        }
+
+        .product-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f2f4f7;
+            vertical-align: middle;
+        }
+
+        .product-table input,
+        .product-table select {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #d0d5dd;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #344054;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .product-table input:focus,
+        .product-table select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        .product-table input::placeholder {
+            color: #9ca3af;
+        }
+
+        .product-table select:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Empty state in table */
+        .table-empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .table-empty-state .material-icons-outlined {
+            font-size: 40px;
+            opacity: 0.4;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* ── NEW column highlight ─────────────────────────────────────── */
+        .col-location {
+            background: #eff6ff !important;
+            min-width: 160px;
+        }
+
+        th.col-location {
+            background: #dbeafe !important;
+        }
+
+        th.col-location::after {
+            content: "MỚI";
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 4px;
+            margin-left: 5px;
+            vertical-align: super;
+        }
+
+        .col-stt {
+            width: 45px;
+            text-align: center;
+        }
+
+        .col-code {
+            min-width: 100px;
+        }
+
+        .col-name {
+            min-width: 180px;
+        }
+
+        .col-brand {
+            min-width: 110px;
+        }
+
+        .col-spec {
+            min-width: 90px;
+        }
+
+        .col-unit {
+            width: 80px;
+        }
+
+        .col-qty {
+            width: 90px;
+        }
+
+        .col-price {
+            width: 110px;
+        }
+
+        .col-total {
+            width: 110px;
+        }
+
+        .col-delete {
+            width: 50px;
+            text-align: center;
+        }
+
+        .btn-delete-row {
+            background: none;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            color: #dc2626;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .btn-delete-row:hover {
+            background: #fef2f2;
+        }
+
+        /* ── Summary section ──────────────────────────────────────────── */
+        .summary-section {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 0;
+        }
+
+        .summary-table {
+            font-size: 14px;
+            color: #344054;
+        }
+
+        .summary-table tr td {
+            padding: 4px 0;
+        }
+
+        .summary-table tr td:first-child {
+            text-align: right;
+            padding-right: 16px;
+            color: #757575;
+        }
+
+        .summary-table tr td:last-child {
+            text-align: right;
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        .summary-table tr.total-row td {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1e293b;
+            padding-top: 8px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* ── Terms section ────────────────────────────────────────────── */
+        .terms-section {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .terms-text {
+            font-size: 13px;
+            color: #757575;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        /* ── Footer bar with LƯU button ──────────────────────────────── */
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 0;
+        }
+
+        .btn-save {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+
+        .btn-save:hover {
+            background: #1d4ed8;
+        }
+
+        /* ── Responsive ───────────────────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .form-layout {
+                flex-direction: column;
+            }
+
+            .form-side {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row-custom {
+                flex-direction: column;
+            }
+
+            .supplier-info {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main-area">
+            <div id="header"></div>
+            <div class="content">
+
+                <!-- Top checkbox -->
+                <label class="top-checkbox">
+                    <input type="checkbox" id="chkNoOrder">
+                    Nhập hàng không thông qua đơn mua
+                </label>
+
+                <!-- Two-column layout: Main + Sidebar -->
+                <div class="form-layout">
+
+                    <!-- ═══════════ LEFT COLUMN (main) ═══════════ -->
+                    <div class="form-main">
+
+                        <!-- Thông tin chung -->
+                        <div class="form-card">
+                            <div class="section-title-blue">Thông tin chung</div>
+
+                            <div class="form-row-custom">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label>Giao nhận phụ trách <span class="required">*</span></label>
+                                        <select class="form-input">
+                                            <option value="">Chọn giao nhận phụ trách...</option>
+                                            <option>Lâm Minh Quý</option>
+                                            <option>Nguyễn Văn B</option>
+                                            <option>Trần Thị C</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label>Nhân viên mua hàng</label>
+                                        <select class="form-input">
+                                            <option value="">Chọn nhân viên...</option>
+                                            <option>Nguyễn Văn A</option>
+                                            <option>Trần Thị B</option>
+                                            <option>Lê Văn C</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row-custom">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label>Thủ kho <span class="required">*</span></label>
+                                        <select class="form-input">
+                                            <option value="">Chọn thủ kho...</option>
+                                            <option>Trần Văn D</option>
+                                            <option>Phạm Thị E</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label>Ngày thực hiện <span class="required">*</span></label>
+                                        <input type="date" class="form-input" value="2026-10-06">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- NEW: Đơn vị thuê kho -->
+                            <div class="form-row-custom">
+                                <div class="form-col field-new">
+                                    <div class="form-group-wrapper">
+                                        <div class="form-group">
+                                            <label>
+                                                Đơn vị thuê kho <span class="required">*</span>
+                                                <span class="badge-new">Mới</span>
+                                            </label>
+                                            <select class="form-input" id="tenantSelect">
+                                                <option value="">Chọn đơn vị thuê kho...</option>
+                                                <option value="KHO NAVIS">KHO NAVIS</option>
+                                                <option value="KHO LABEE">KHO LABEE</option>
+                                                <option value="KHO POTACHEM">KHO POTACHEM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <!-- empty spacer for alignment -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin nhà cung cấp -->
+                        <div class="form-card">
+                            <div class="section-title-blue">Thông tin nhà cung cấp</div>
+
+                            <div class="form-row-custom">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label>Nhà cung cấp</label>
+                                        <input type="text" class="form-input" placeholder="Tìm nhà cung cấp..." list="supplierList">
+                                        <datalist id="supplierList">
+                                            <option value="SYNZEAL RESEARCH">
+                                            <option value="CỔ PHẦN THIẾT BỊ ĐỆ NHẤT">
+                                            <option value="CỔ PHẦN THƯƠNG MẠI HÀ PHAN">
+                                            <option value="PROLAB">
+                                            <option value="CÔNG TY TNHH LABEE">
+                                            <option value="HÓA CHẤT TP.HCM">
+                                        </datalist>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="supplier-info">
+                                <div class="supplier-info-col">
+                                    <div class="info-row">
+                                        <span class="info-label">Mã số thuế:</span>
+                                        <span class="info-value">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Địa chỉ:</span>
+                                        <span class="info-value">-</span>
+                                    </div>
+                                </div>
+                                <div class="supplier-info-col">
+                                    <div class="info-row">
+                                        <span class="info-label">Người phụ trách:</span>
+                                        <span class="info-value">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Điện thoại:</span>
+                                        <span class="info-value">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ═══════════ RIGHT SIDEBAR ═══════════ -->
+                    <div class="form-side">
+
+                        <!-- Thông tin vận chuyển -->
+                        <div class="form-card">
+                            <div class="section-title-blue">Thông tin vận chuyển</div>
+
+                            <div class="form-group" style="margin-bottom:14px;">
+                                <label>Đơn vị v/c</label>
+                                <input type="text" class="form-input" placeholder="Nhập đơn vị vận chuyển...">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:14px;">
+                                <label>Số kiện hàng</label>
+                                <input type="number" class="form-input" placeholder="0" min="0">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:14px;">
+                                <label>Khối lượng</label>
+                                <input type="text" class="form-input" placeholder="0 kg">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:14px;">
+                                <label>Cước phí</label>
+                                <input type="text" class="form-input" placeholder="0 VNĐ">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Hóa đơn</label>
+                                <select class="form-input">
+                                    <option value="">Chọn loại hóa đơn...</option>
+                                    <option>Hóa đơn VAT</option>
+                                    <option>Phiếu xuất kho</option>
+                                    <option>Không có</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú nhập kho -->
+                        <div class="form-card">
+                            <div class="section-title-blue">Ghi chú nhập kho</div>
+                            <textarea class="form-input" rows="5" placeholder="Nhập ghi chú..."></textarea>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ═══════════ PRODUCT TABLE (full width) ═══════════ -->
+                <div class="product-section">
+                    <div class="product-header">
+                        <div class="section-title-blue" style="margin-bottom:0;">Danh sách sản phẩm</div>
+                        <button class="btn-add-product" id="btnAddRow">+ Thêm SP từ đơn mua hàng</button>
+                    </div>
+
+                    <div class="product-table-wrapper">
+                        <table class="product-table" id="productTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-stt">STT</th>
+                                    <th class="col-code">MÃ SP</th>
+                                    <th class="col-name">TÊN SẢN PHẨM</th>
+                                    <th class="col-brand">THƯƠNG HIỆU</th>
+                                    <th class="col-spec">QUY CÁCH</th>
+                                    <th class="col-unit">ĐVT</th>
+                                    <th class="col-qty">SỐ LƯỢNG</th>
+                                    <th class="col-price">GIÁ NHẬP</th>
+                                    <th class="col-total">THÀNH TIỀN</th>
+                                    <th class="col-location">VỊ TRÍ LƯU</th>
+                                    <th class="col-delete">XÓA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productBody">
+                                <tr>
+                                    <td colspan="11">
+                                        <div class="table-empty-state">
+                                            <span class="material-icons-outlined">inbox</span>
+                                            Không có dữ liệu
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="summary-section">
+                        <table class="summary-table">
+                            <tr>
+                                <td>Thành tiền chưa có thuế(VNĐ):</td>
+                                <td id="subtotal">0</td>
+                            </tr>
+                            <tr>
+                                <td>Thuế GTGT(VNĐ):</td>
+                                <td id="taxAmount">0</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Tổng tiền thanh toán(VNĐ):</td>
+                                <td id="totalAmount">0</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ═══════════ TERMS SECTION ═══════════ -->
+                <div class="terms-section">
+                    <div class="section-title-blue">Điều khoản của đơn mua hàng:</div>
+                    <div class="terms-text">Tổng cộng tiền thanh toán đã bao gồm thuế GTGT.</div>
+
+                    <div class="form-row-custom">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Hình thức thanh toán:</label>
+                                <select class="form-input">
+                                    <option value="">Chọn hình thức thanh toán...</option>
+                                    <option>Chuyển khoản</option>
+                                    <option>Tiền mặt</option>
+                                    <option>L/C</option>
+                                    <option>Trả chậm 30 ngày</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Hình thức giao hàng:</label>
+                                <select class="form-input">
+                                    <option value="">Chọn hình thức giao hàng...</option>
+                                    <option>Giao tại kho</option>
+                                    <option>Tự đến lấy</option>
+                                    <option>Gửi chuyển phát</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row-custom">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Địa điểm giao hàng: <span class="required">*</span></label>
+                                <input type="text" class="form-input" placeholder="Nhập địa điểm giao hàng...">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Chứng từ thanh toán: <span class="required">*</span></label>
+                                <select class="form-input">
+                                    <option value="">Chọn chứng từ thanh toán...</option>
+                                    <option>Hóa đơn VAT</option>
+                                    <option>Phiếu chi</option>
+                                    <option>Giấy báo nợ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════ FOOTER: LƯU button ═══════════ -->
+                <div class="form-footer">
+                    <button class="btn-save" onclick="alert('Wireframe demo: Đã lưu phiếu nhập kho!')">
+                        <span class="material-icons-outlined" style="font-size:18px;">save</span>
+                        LƯU
+                    </button>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w08-danh-sach-nhap-kho.html', 'NHẬP KHO / TẠO NHẬP KHO');</script>
+    <script>
+        // ══════════════════════════════════════════════════════════════
+        // Location data per tenant
+        // ══════════════════════════════════════════════════════════════
+        var locationData = {
+            'KHO NAVIS': [
+                'B01.201.1', 'B01.201.2', 'B01.201.3', 'B01.302.1', 'B01.302.2',
+                'B01.401.1', 'B01.401.2', 'B02.101.1', 'B02.101.5', 'B02.203.1',
+                'B03.105.1', 'B03.105.2', 'B03.210.4', 'B04.301.6', 'B04.302.3',
+                'B05.108.1'
+            ],
+            'KHO LABEE': [
+                'B06.102.1', 'B06.103.2', 'B06.205.3',
+                'B07.201.4', 'B07.305.1'
+            ],
+            'KHO POTACHEM': [
+                'B10.101.2', 'B10.203.5', 'B10.301.1', 'B10.402.3'
+            ]
+        };
+
+        // ══════════════════════════════════════════════════════════════
+        // Tenant select handler - update all location dropdowns
+        // ══════════════════════════════════════════════════════════════
+        var tenantSelect = document.getElementById('tenantSelect');
+
+        tenantSelect.addEventListener('change', function () {
+            var tenant = this.value;
+            var locationSelects = document.querySelectorAll('.location-select');
+
+            locationSelects.forEach(function (sel) {
+                sel.innerHTML = '';
+
+                if (!tenant) {
+                    sel.disabled = true;
+                    var opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = 'Chọn đơn vị thuê trước';
+                    sel.appendChild(opt);
+                } else {
+                    sel.disabled = false;
+                    var defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = 'Chọn vị trí lưu...';
+                    sel.appendChild(defaultOpt);
+
+                    var locs = locationData[tenant] || [];
+                    locs.forEach(function (loc) {
+                        var opt = document.createElement('option');
+                        opt.value = loc;
+                        opt.textContent = loc;
+                        sel.appendChild(opt);
+                    });
+                }
+            });
+        });
+
+        // ══════════════════════════════════════════════════════════════
+        // Build location <option> HTML string
+        // ══════════════════════════════════════════════════════════════
+        function buildLocationOptions(tenant) {
+            if (!tenant) {
+                return '<option value="">Chọn đơn vị thuê trước</option>';
+            }
+            var html = '<option value="">Chọn vị trí lưu...</option>';
+            var locs = locationData[tenant] || [];
+            locs.forEach(function (loc) {
+                html += '<option value="' + loc + '">' + loc + '</option>';
+            });
+            return html;
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // Add product row
+        // ══════════════════════════════════════════════════════════════
+        var rowCounter = 0;
+
+        document.getElementById('btnAddRow').addEventListener('click', function () {
+            var tbody = document.getElementById('productBody');
+            var tenant = tenantSelect.value;
+
+            // Clear empty state if it exists
+            var emptyState = tbody.querySelector('.table-empty-state');
+            if (emptyState) {
+                tbody.innerHTML = '';
+            }
+
+            rowCounter++;
+
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td class="col-stt" style="text-align:center;">' + rowCounter + '</td>' +
+                '<td class="col-code"><input type="text" placeholder="Mã SP..."></td>' +
+                '<td class="col-name"><input type="text" placeholder="Nhập tên sản phẩm..."></td>' +
+                '<td class="col-brand"><input type="text" placeholder="Thương hiệu..."></td>' +
+                '<td class="col-spec"><input type="text" placeholder="Quy cách..."></td>' +
+                '<td class="col-unit">' +
+                    '<select>' +
+                        '<option value="">--</option>' +
+                        '<option>Chai</option>' +
+                        '<option>Hộp</option>' +
+                        '<option>Thùng</option>' +
+                        '<option>Cái</option>' +
+                        '<option>Kg</option>' +
+                        '<option>Lít</option>' +
+                        '<option>Bộ</option>' +
+                        '<option>Gói</option>' +
+                    '</select>' +
+                '</td>' +
+                '<td class="col-qty"><input type="number" class="qty-input" placeholder="0" min="0" value="0"></td>' +
+                '<td class="col-price"><input type="text" class="price-input" placeholder="0" value="0"></td>' +
+                '<td class="col-total"><input type="text" class="total-input" placeholder="0" readonly style="background:#f9fafb;font-weight:500;" value="0"></td>' +
+                '<td class="col-location">' +
+                    '<select class="location-select"' + (tenant ? '' : ' disabled') + '>' +
+                        buildLocationOptions(tenant) +
+                    '</select>' +
+                '</td>' +
+                '<td class="col-delete" style="text-align:center;">' +
+                    '<button class="btn-delete-row" title="Xóa dòng" onclick="deleteRow(this)">&#10005;</button>' +
+                '</td>';
+
+            tbody.appendChild(tr);
+
+            // Attach input event listeners for this row
+            attachRowListeners(tr);
+        });
+
+        // ══════════════════════════════════════════════════════════════
+        // Attach qty/price change listeners to a row
+        // ══════════════════════════════════════════════════════════════
+        function attachRowListeners(tr) {
+            var qtyInput = tr.querySelector('.qty-input');
+            var priceInput = tr.querySelector('.price-input');
+
+            if (qtyInput) {
+                qtyInput.addEventListener('input', function () {
+                    updateRowTotal(tr);
+                    updateSummary();
+                });
+            }
+
+            if (priceInput) {
+                priceInput.addEventListener('input', function () {
+                    updateRowTotal(tr);
+                    updateSummary();
+                });
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // Calculate row total (qty * price)
+        // ══════════════════════════════════════════════════════════════
+        function updateRowTotal(tr) {
+            var qtyInput = tr.querySelector('.qty-input');
+            var priceInput = tr.querySelector('.price-input');
+            var totalInput = tr.querySelector('.total-input');
+
+            if (!qtyInput || !priceInput || !totalInput) return;
+
+            var qty = parseFloat(qtyInput.value) || 0;
+            var price = parseFloat(priceInput.value.replace(/,/g, '')) || 0;
+            var total = qty * price;
+
+            totalInput.value = formatNumber(total);
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // Update summary totals
+        // ══════════════════════════════════════════════════════════════
+        function updateSummary() {
+            var rows = document.querySelectorAll('#productBody tr');
+            var subtotal = 0;
+
+            rows.forEach(function (row) {
+                var totalInput = row.querySelector('.total-input');
+                if (totalInput) {
+                    subtotal += parseFloat(totalInput.value.replace(/,/g, '')) || 0;
+                }
+            });
+
+            var tax = Math.round(subtotal * 0.1);
+            var total = subtotal + tax;
+
+            document.getElementById('subtotal').textContent = formatNumber(subtotal);
+            document.getElementById('taxAmount').textContent = formatNumber(tax);
+            document.getElementById('totalAmount').textContent = formatNumber(total);
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // Format number with commas
+        // ══════════════════════════════════════════════════════════════
+        function formatNumber(num) {
+            if (num === 0) return '0';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // Delete a product row
+        // ══════════════════════════════════════════════════════════════
+        function deleteRow(btn) {
+            var row = btn.closest('tr');
+            if (row) {
+                row.remove();
+
+                // Re-number rows
+                var rows = document.querySelectorAll('#productBody tr');
+                var hasDataRows = false;
+
+                rows.forEach(function (r, i) {
+                    var sttCell = r.querySelector('.col-stt');
+                    if (sttCell && !r.querySelector('.table-empty-state')) {
+                        sttCell.textContent = i + 1;
+                        hasDataRows = true;
+                    }
+                });
+
+                // If no rows left, show empty state
+                if (!hasDataRows || rows.length === 0) {
+                    rowCounter = 0;
+                    document.getElementById('productBody').innerHTML =
+                        '<tr><td colspan="11">' +
+                        '<div class="table-empty-state">' +
+                        '<span class="material-icons-outlined">inbox</span>' +
+                        'Không có dữ liệu' +
+                        '</div></td></tr>';
+                } else {
+                    rowCounter = rows.length;
+                }
+
+                updateSummary();
+            }
+        }
+    </script>
+</body>
+</html>

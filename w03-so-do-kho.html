@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ đồ kho - Navis ERP</title>
+  <link rel="stylesheet" href="shared.css?v=5">
+  <style>
+    /* ── Utilization Summary ───────────────────────────────────────── */
+    .util-summary {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 16px 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .util-card {
+      padding: 8px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      text-align: center;
+      min-width: 180px;
+    }
+    .util-card-label { font-size: 12px; color: #666; margin-bottom: 2px; }
+    .util-card-value { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+    .util-card-value .pct { color: #2196F3; font-size: 16px; }
+    .util-right { margin-left: auto; display: flex; gap: 8px; }
+
+    /* ── Room Tabs ─────────────────────────────────────────────────── */
+    .room-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .room-tab {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      text-align: center;
+      transition: all 0.15s;
+      background: none;
+      border-left: none; border-right: none; border-top: none;
+    }
+    .room-tab:hover { color: #333; background: #f5f5f5; }
+    .room-tab.active {
+      color: #2196F3;
+      border-bottom-color: #2196F3;
+    }
+    .room-tab .room-pct {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: #999;
+      margin-top: 2px;
+    }
+    .room-tab.active .room-pct { color: #2196F3; }
+
+    /* ── Rack Group Tabs ───────────────────────────────────────────── */
+    .rack-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .rack-tab {
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.15s;
+      background: none;
+      border-left: none; border-right: none; border-top: none;
+    }
+    .rack-tab:hover { color: #333; }
+    .rack-tab.active { color: #2196F3; border-bottom-color: #2196F3; }
+
+    /* ── Toolbar ───────────────────────────────────────────────────── */
+    .map-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .map-toolbar label { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .map-toolbar input[type="checkbox"] { accent-color: #2196F3; width: 16px; height: 16px; }
+
+    /* ── Rack Grid (table-like) ────────────────────────────────────── */
+    .rack-section {
+      margin-bottom: 24px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 16px;
+    }
+    .rack-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .rack-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .rack-name small {
+      font-weight: 400;
+      color: #888;
+      font-size: 12px;
+      margin-left: 6px;
+    }
+    .rack-grid-wrapper {
+      overflow-x: auto;
+    }
+    .rack-grid {
+      display: grid;
+      gap: 2px;
+      min-width: fit-content;
+    }
+    .rack-grid-row {
+      display: contents;
+    }
+    /* Row label (floor letter) */
+    .floor-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #333;
+      min-width: 28px;
+      height: 32px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    /* Rack label (left side) */
+    .rack-label-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      min-width: 60px;
+      grid-row: span 4;
+      background: #f9f9f9;
+      border-radius: 4px;
+      writing-mode: horizontal-tb;
+      text-align: center;
+      line-height: 1.3;
+    }
+    /* Slot cell */
+    .slot-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 32px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      user-select: none;
+    }
+    .slot-cell:hover {
+      transform: scale(1.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      z-index: 1;
+      position: relative;
+    }
+    /* Column headers */
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #999;
+      min-width: 42px;
+      height: 20px;
+    }
+
+    /* Utilization colors (green gradient) */
+    .slot-0 { background: #f0f0f0; color: #bbb; }
+    .slot-1 { background: #e8f5e9; color: #2e7d32; }
+    .slot-2 { background: #c8e6c9; color: #2e7d32; }
+    .slot-3 { background: #a5d6a7; color: #1b5e20; }
+    .slot-4 { background: #81c784; color: #1b5e20; }
+    .slot-5 { background: #66bb6a; color: #fff; }
+    .slot-6 { background: #43a047; color: #fff; }
+    .slot-7 { background: #2e7d32; color: #fff; }
+
+    /* Legend */
+    .legend-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-bar .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .legend-bar .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* ── Modal: Khởi tạo vị trí ────────────────────────────────────── */
+    .init-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .init-modal.modal--visible { display: flex; }
+    .init-dialog {
+      background: #fff;
+      border-radius: 10px;
+      width: 560px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .init-dialog .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .init-dialog .modal-title { font-size: 16px; font-weight: 600; color: #3e3c6a; }
+    .init-dialog .modal-body { padding: 20px; }
+    .init-dialog .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    /* Grid size picker (Excel-style) */
+    .grid-picker {
+      display: inline-grid;
+      gap: 2px;
+      margin-top: 8px;
+    }
+    .grid-picker-cell {
+      width: 28px; height: 28px;
+      border: 1px solid #d0d5dd;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .grid-picker-cell:hover,
+    .grid-picker-cell.selected {
+      background: #2196F3;
+      border-color: #1976D2;
+    }
+    .grid-picker-info {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    /* ── Add Tab Button ────────────────────────────────────────────── */
+    .tab-add {
+      padding: 8px 14px;
+      font-size: 18px;
+      font-weight: 400;
+      color: #2196F3;
+      cursor: pointer;
+      border: none;
+      background: none;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tab-add:hover {
+      background: #e3f2fd;
+      border-radius: 6px 6px 0 0;
+    }
+    .tab-add .add-label {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ── Rack Section Add Button ───────────────────────────────────── */
+    .rack-add-section {
+      margin-bottom: 24px;
+      background: #fff;
+      border: 2px dashed #c8d6e5;
+      border-radius: 8px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      gap: 8px;
+      color: #2196F3;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .rack-add-section:hover {
+      background: #e3f2fd;
+      border-color: #2196F3;
+    }
+
+    /* ── Room Modal ────────────────────────────────────────────────── */
+    .room-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .room-modal.modal--visible { display: flex; }
+
+    /* ── Responsive ────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .util-summary { flex-direction: column; align-items: stretch; }
+      .util-right { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-area">
+      <header id="header"></header>
+      <main class="content">
+
+        <!-- Utilization Summary -->
+        <div class="util-summary">
+          <div class="util-card">
+            <div class="util-card-label">Tỷ lệ sử dụng kho (tổng thể)</div>
+            <div class="util-card-value"><span class="pct" style="font-size:28px;font-weight:800;">57.4%</span></div>
+            <div style="font-size:12px;color:#888;margin-top:2px;">4,386 / 7,643 vị trí</div>
+          </div>
+          <div class="util-right">
+            <button class="btn btn-primary" id="btn-init" onclick="document.getElementById('modal-init').classList.add('modal--visible')">
+              <span class="material-icons-outlined" style="font-size:18px">add_location_alt</span>
+              Thêm Rack (dãy kệ)
+            </button>
+            <button class="btn btn-secondary" onclick="document.getElementById('modal-assign').classList.add('modal--visible')">
+              <span class="material-icons-outlined" style="font-size:18px">assignment_ind</span>
+              Khai báo đơn vị
+            </button>
+          </div>
+        </div>
+
+        <!-- Room Tabs -->
+        <div class="room-tabs" id="room-tabs">
+          <button class="room-tab active" data-room="room1">ROOM 01<span class="room-pct">77.8%</span></button>
+          <button class="room-tab" data-room="room2">ROOM 02<span class="room-pct">62.3%</span></button>
+          <button class="room-tab" data-room="room3">ROOM 03<span class="room-pct">45.1%</span></button>
+          <button class="tab-add" onclick="document.getElementById('modal-room').classList.add('modal--visible')" title="Thêm Room mới">
+            <span class="material-icons-outlined" style="font-size:18px">add_circle_outline</span>
+            <span class="add-label">Thêm Room</span>
+          </button>
+        </div>
+
+        <!-- Rack Group Tabs -->
+        <div class="rack-tabs" id="rack-tabs">
+          <button class="rack-tab active" data-group="1-5">RACKS 1 – 5</button>
+          <button class="rack-tab" data-group="6-10">RACKS 6 – 10</button>
+          <button class="rack-tab" data-group="11-15">RACKS 11 – 15</button>
+          <button class="rack-tab" data-group="16-21">RACKS 16 – 21</button>
+          <button class="rack-tab" data-group="22-26">RACKS 22 – 26</button>
+        </div>
+
+        <!-- Legend -->
+        <div class="map-toolbar">
+          <div class="legend-bar">
+            <div class="legend-item"><span class="swatch slot-0"></span> Trống</div>
+            <div class="legend-item"><span class="swatch slot-1"></span> &lt;25%</div>
+            <div class="legend-item"><span class="swatch slot-3"></span> 25-50%</div>
+            <div class="legend-item"><span class="swatch slot-5"></span> 50-75%</div>
+            <div class="legend-item"><span class="swatch slot-7"></span> &gt;75%</div>
+          </div>
+        </div>
+
+        <!-- Rack Grids (rendered by JS) -->
+        <div id="rack-container"></div>
+
+      </main>
+      <footer id="footer"></footer>
+    </div>
+  </div>
+
+  <!-- Modal: Khởi tạo vị trí -->
+  <div class="init-modal" id="modal-init">
+    <div class="init-dialog">
+      <div class="modal-header">
+        <span class="modal-title">Thêm Rack (dãy kệ) mới</span>
+        <button class="modal-close" onclick="document.getElementById('modal-init').classList.remove('modal--visible')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Khu vực lưu trữ <span class="required">*</span></label>
+          <select class="form-control" id="init-room">
+            <option value="">Chọn khu vực...</option>
+            <option value="Room 1">Room 1</option>
+            <option value="Room 2">Room 2</option>
+            <option value="Room 3">Room 3</option>
+            <option value="new">+ Tạo khu vực mới...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên dãy kệ <span class="required">*</span></label>
+          <input type="text" class="form-control" id="init-rack" placeholder="VD: B06, C01...">
+          <span class="form-help">Mã dãy kệ sẽ dùng làm prefix cho mã vị trí (VD: B06.101.1)</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Số lượng vị trí <span class="required">*</span></label>
+          <span class="form-help" style="margin-bottom:8px; display:block">Chọn số tầng (hàng) × số ô (cột) giống tạo bảng Excel:</span>
+          <div style="display:flex; gap:16px; align-items:flex-start;">
+            <div>
+              <div class="grid-picker" id="grid-picker" style="grid-template-columns: repeat(10, 28px);"></div>
+              <div class="grid-picker-info" id="grid-picker-info">Chưa chọn</div>
+            </div>
+            <div style="flex:1;">
+              <div class="form-group" style="margin-bottom:8px">
+                <label class="form-label" style="font-size:12px">Số tầng (hàng)</label>
+                <input type="number" class="form-control" id="init-floors" min="1" max="10" value="4" style="width:80px">
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:12px">Số ô mỗi tầng (cột)</label>
+                <input type="number" class="form-control" id="init-slots" min="1" max="30" value="20" style="width:80px">
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:12px">Số pallet mỗi ô</label>
+                <input type="number" class="form-control" id="init-pallets" min="1" max="10" value="7" style="width:80px">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-info" style="margin-top:12px">
+          <strong>Preview mã vị trí:</strong> B06.101.1 → B06.104.20 (4 tầng × 20 ô × 7 pallet = 560 vị trí)
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('modal-init').classList.remove('modal--visible')">Hủy</button>
+        <button class="btn btn-primary" onclick="alert('Đã khởi tạo thành công!'); document.getElementById('modal-init').classList.remove('modal--visible')">Khởi tạo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Khai báo vị trí đơn vị -->
+  <div class="init-modal" id="modal-assign">
+    <div class="init-dialog" style="width:640px">
+      <div class="modal-header">
+        <span class="modal-title">Khai báo vị trí cho đơn vị thuê kho</span>
+        <button class="modal-close" onclick="document.getElementById('modal-assign').classList.remove('modal--visible')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Đơn vị thuê kho <span class="required">*</span></label>
+            <select class="form-control">
+              <option value="">Chọn đơn vị...</option>
+              <option value="navis">KHO NAVIS</option>
+              <option value="labee">KHO LABEE</option>
+              <option value="potachem">KHO POTACHEM</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Khu vực</label>
+            <select class="form-control">
+              <option value="room1">Room 1</option>
+              <option value="room2">Room 2</option>
+              <option value="room3">Room 3</option>
+            </select>
+          </div>
+        </div>
+        <p style="font-size:13px;color:#555;margin-bottom:12px">Click vào các vị trí bên dưới để gán cho đơn vị đã chọn. <span style="color:#2196F3">■</span> = đã gán, <span style="color:#ccc">■</span> = trống, <span style="color:#999">■</span> = đơn vị khác.</p>
+        <div style="overflow-x:auto">
+          <table style="border-collapse:collapse;font-size:12px;width:100%">
+            <thead>
+              <tr>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0;font-weight:600">Rack</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">1</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">2</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">3</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">4</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">5</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">6</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">7</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">8</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">9</th>
+                <th style="padding:6px 8px;background:#f5f5f5;border:1px solid #e0e0e0">10</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:6px 8px;border:1px solid #e0e0e0;font-weight:600">B01</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B01.101 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B01.102 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B01.103 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B01.104 — KHO LABEE">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B01.105 — KHO LABEE">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B01.106 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B01.107 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B01.108 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B01.109 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B01.110 — Trống">□</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 8px;border:1px solid #e0e0e0;font-weight:600">B02</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B02.101 — KHO POTACHEM">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B02.102 — KHO POTACHEM">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B02.103 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B02.104 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B02.105 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B02.106 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B02.107 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B02.108 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B02.109 — KHO LABEE">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B02.110 — KHO LABEE">■</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 8px;border:1px solid #e0e0e0;font-weight:600">B03</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B03.101 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B03.102 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B03.103 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B03.104 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#bbdefb" title="B03.105 — KHO NAVIS">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B03.106 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B03.107 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#fff" title="B03.108 — Trống">□</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B03.109 — KHO LABEE">■</td>
+                <td style="padding:4px;border:1px solid #e0e0e0;text-align:center;cursor:pointer;background:#e0e0e0;color:#999" title="B03.110 — KHO LABEE">■</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:16px;font-size:12px;color:#666">
+          <span><span style="display:inline-block;width:14px;height:14px;background:#bbdefb;border:1px solid #90caf9;border-radius:2px;vertical-align:middle"></span> Đơn vị đang chọn</span>
+          <span><span style="display:inline-block;width:14px;height:14px;background:#e0e0e0;border:1px solid #bbb;border-radius:2px;vertical-align:middle"></span> Đơn vị khác</span>
+          <span><span style="display:inline-block;width:14px;height:14px;background:#fff;border:1px solid #ccc;border-radius:2px;vertical-align:middle"></span> Trống</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('modal-assign').classList.remove('modal--visible')">Đóng</button>
+        <button class="btn btn-primary" onclick="alert('Đã lưu khai báo!'); document.getElementById('modal-assign').classList.remove('modal--visible')">Lưu khai báo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tạo Room mới -->
+  <div class="room-modal" id="modal-room">
+    <div class="init-dialog" style="width:440px">
+      <div class="modal-header">
+        <span class="modal-title">Tạo Room (khu vực) mới</span>
+        <button class="modal-close" onclick="document.getElementById('modal-room').classList.remove('modal--visible')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tên Room <span class="required">*</span></label>
+          <input type="text" class="form-control" placeholder="VD: ROOM 04, KHU A..." value="ROOM 04">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả</label>
+          <input type="text" class="form-control" placeholder="Mô tả khu vực (không bắt buộc)">
+        </div>
+        <div class="alert alert-info" style="margin-top:12px">
+          Sau khi tạo Room, bạn có thể thêm các Rack (dãy kệ) vào Room này.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('modal-room').classList.remove('modal--visible')">Hủy</button>
+        <button class="btn btn-primary" onclick="alert('Wireframe demo: Đã tạo Room mới!'); document.getElementById('modal-room').classList.remove('modal--visible')">Tạo Room</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js?v=5"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      initPage('w03-so-do-kho.html', 'VỊ TRÍ HÀNG HOÁ / SƠ ĐỒ KHO');
+
+      // ── Sample warehouse data ──────────────────────────────────────
+      var TOTAL_PALLETS = 7;
+      var FLOORS = ['D', 'C', 'B', 'A']; // top to bottom
+
+      // Generate sample rack data
+      function generateRackData(rackName, rackIndex, numSlots) {
+        var floors = [];
+        for (var f = 0; f < FLOORS.length; f++) {
+          var slots = [];
+          for (var s = 1; s <= numSlots; s++) {
+            // Semi-random utilization for demo
+            var seed = (rackIndex * 100 + f * 31 + s * 7) % 17;
+            var used = Math.min(TOTAL_PALLETS, Math.max(0, Math.floor(seed / 2.5)));
+            var code = rackName + '.' + (f + 1) + String(s).padStart(2, '0') + '.';
+            slots.push({ used: used, total: TOTAL_PALLETS, code: code });
+          }
+          floors.push({ label: FLOORS[f], slots: slots });
+        }
+        return { name: rackName, index: rackIndex, floors: floors };
+      }
+
+      var rackGroups = {
+        '1-5': [
+          generateRackData('B01', 1, 20),
+          generateRackData('B02', 2, 20),
+          generateRackData('B03', 3, 20),
+          generateRackData('B04', 4, 20),
+          generateRackData('B05', 5, 20)
+        ],
+        '6-10': [
+          generateRackData('B06', 6, 18),
+          generateRackData('B07', 7, 18),
+          generateRackData('B08', 8, 18),
+          generateRackData('B09', 9, 18),
+          generateRackData('B10', 10, 18)
+        ],
+        '11-15': [
+          generateRackData('B11', 11, 16),
+          generateRackData('B12', 12, 16),
+          generateRackData('B13', 13, 16),
+          generateRackData('B14', 14, 16),
+          generateRackData('B15', 15, 16)
+        ]
+      };
+
+      var activeGroup = '1-5';
+
+      // ── Utility: color class based on utilization ──────────────────
+      function slotClass(used, total) {
+        if (used === 0) return 'slot-0';
+        var pct = used / total;
+        if (pct <= 0.15) return 'slot-1';
+        if (pct <= 0.3) return 'slot-2';
+        if (pct <= 0.45) return 'slot-3';
+        if (pct <= 0.6) return 'slot-4';
+        if (pct <= 0.75) return 'slot-5';
+        if (pct <= 0.9) return 'slot-6';
+        return 'slot-7';
+      }
+
+      // ── Render rack grid ───────────────────────────────────────────
+      function renderRack(rack) {
+        var numSlots = rack.floors[0].slots.length;
+        // Grid columns: rack-label | floor-label | slot1 | slot2 | ...
+        var cols = numSlots + 2;
+        var html = '<div class="rack-section">';
+        html += '<div class="rack-header">';
+        html += '<span class="rack-name">' + rack.name + '</span>';
+        html += '</div>';
+        html += '<div class="rack-grid-wrapper">';
+        html += '<div class="rack-grid" style="grid-template-columns: 60px 28px repeat(' + numSlots + ', 1fr);">';
+
+        // Column headers
+        html += '<div class="col-header"></div><div class="col-header"></div>';
+        for (var c = 1; c <= numSlots; c++) {
+          html += '<div class="col-header">' + c + '</div>';
+        }
+
+        // Rows (floors, top to bottom: D, C, B, A)
+        for (var f = 0; f < rack.floors.length; f++) {
+          var floor = rack.floors[f];
+          // Rack label only on first row
+          if (f === 0) {
+            html += '<div class="rack-label-cell">' + rack.name + '</div>';
+          }
+          html += '<div class="floor-label">' + floor.label + '</div>';
+          for (var s = 0; s < floor.slots.length; s++) {
+            var slot = floor.slots[s];
+            var cls = slotClass(slot.used, slot.total);
+            var pctVal = slot.total > 0 ? Math.round(slot.used / slot.total * 100) : 0;
+            var title = rack.name + '.' + (f+1) + String(s+1).padStart(2,'0') + ' — ' + slot.used + '/' + slot.total + ' pallet (' + pctVal + '%)';
+            html += '<div class="slot-cell ' + cls + '" title="' + title + '" data-code="' + slot.code + '">';
+            html += pctVal + '%';
+            html += '</div>';
+          }
+        }
+
+        html += '</div></div></div>';
+        return html;
+      }
+
+      function renderRackContainer() {
+        var container = document.getElementById('rack-container');
+        var racks = rackGroups[activeGroup];
+        if (!racks) {
+          container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Chưa có dữ liệu</div></div>';
+          return;
+        }
+        var html = '';
+        for (var i = 0; i < racks.length; i++) {
+          html += renderRack(racks[i]);
+        }
+        // Add rack button
+        html += '<div class="rack-add-section" onclick="document.getElementById(\'modal-init\').classList.add(\'modal--visible\')">';
+        html += '<span class="material-icons-outlined" style="font-size:22px">add_circle_outline</span>';
+        html += 'Thêm Rack mới vào nhóm này';
+        html += '</div>';
+        container.innerHTML = html;
+      }
+
+      // ── Tab switching ──────────────────────────────────────────────
+      document.getElementById('room-tabs').addEventListener('click', function(e) {
+        var tab = e.target.closest('.room-tab');
+        if (!tab) return;
+        document.querySelectorAll('.room-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+      });
+
+      document.getElementById('rack-tabs').addEventListener('click', function(e) {
+        var tab = e.target.closest('.rack-tab');
+        if (!tab) return;
+        document.querySelectorAll('.rack-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        activeGroup = tab.getAttribute('data-group');
+        renderRackContainer();
+      });
+
+      // ── Click on slot cell → navigate to detail ────────────────────
+      document.getElementById('rack-container').addEventListener('click', function(e) {
+        var cell = e.target.closest('.slot-cell');
+        if (cell) {
+          var code = cell.getAttribute('data-code') || '';
+          window.location = 'w04-chi-tiet-vi-tri.html?location=' + encodeURIComponent(code);
+        }
+      });
+
+      // ── Grid picker (Excel-style) in modal ─────────────────────────
+      var picker = document.getElementById('grid-picker');
+      var pickerInfo = document.getElementById('grid-picker-info');
+      var pickerRows = 6, pickerCols = 10;
+      var selectedR = 0, selectedC = 0;
+
+      // Build picker grid
+      var pickerHTML = '';
+      for (var r = 1; r <= pickerRows; r++) {
+        for (var c = 1; c <= pickerCols; c++) {
+          pickerHTML += '<div class="grid-picker-cell" data-r="' + r + '" data-c="' + c + '"></div>';
+        }
+      }
+      picker.innerHTML = pickerHTML;
+
+      picker.addEventListener('mouseover', function(e) {
+        var cell = e.target.closest('.grid-picker-cell');
+        if (!cell) return;
+        var r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+        highlightPicker(r, c);
+      });
+
+      picker.addEventListener('click', function(e) {
+        var cell = e.target.closest('.grid-picker-cell');
+        if (!cell) return;
+        selectedR = parseInt(cell.dataset.r);
+        selectedC = parseInt(cell.dataset.c);
+        document.getElementById('init-floors').value = selectedR;
+        document.getElementById('init-slots').value = selectedC;
+        pickerInfo.textContent = selectedR + ' tầng × ' + selectedC + ' ô = ' + (selectedR * selectedC) + ' vị trí';
+      });
+
+      function highlightPicker(r, c) {
+        var cells = picker.querySelectorAll('.grid-picker-cell');
+        cells.forEach(function(cell) {
+          var cr = parseInt(cell.dataset.r), cc = parseInt(cell.dataset.c);
+          if (cr <= r && cc <= c) {
+            cell.classList.add('selected');
+          } else {
+            cell.classList.remove('selected');
+          }
+        });
+        pickerInfo.textContent = r + ' tầng × ' + c + ' ô = ' + (r * c) + ' vị trí';
+      }
+
+      // ── Initial render ─────────────────────────────────────────────
+      renderRackContainer();
+
+    })();
+  </script>
+</body>
+</html>

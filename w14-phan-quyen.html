@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phân quyền - Navis ERP</title>
+    <link rel="stylesheet" href="shared.css?v=5">
+    <style>
+        /* ── Split Panel Layout ──────────────────────────────────────── */
+
+        .split-panel {
+            display: flex;
+            gap: 0;
+            height: calc(100vh - 52px - 42px - 40px);
+            min-height: 500px;
+        }
+
+        /* ── Left Panel: Role List ───────────────────────────────────── */
+
+        .panel-left {
+            width: 30%;
+            min-width: 260px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px 0 0 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-left-header {
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .panel-left-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .btn-create-role {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 9px 14px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-create-role:hover {
+            background: #1d4ed8;
+        }
+
+        .role-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .role-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: background 0.12s, border-color 0.12s;
+            position: relative;
+        }
+
+        .role-item:hover {
+            background: #f8fafc;
+        }
+
+        .role-item--active {
+            background: #eff6ff;
+            border-left-color: #2563eb;
+        }
+
+        .role-item--active:hover {
+            background: #dbeafe;
+        }
+
+        .role-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .role-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 2px;
+        }
+
+        .role-item--active .role-name {
+            color: #1d4ed8;
+        }
+
+        .role-users {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .role-menu-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 4px;
+            line-height: 1;
+            transition: background 0.12s, color 0.12s;
+            position: relative;
+        }
+
+        .role-menu-btn:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .role-dropdown {
+            display: none;
+            position: absolute;
+            right: 18px;
+            top: 100%;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+            z-index: 50;
+            min-width: 120px;
+            overflow: hidden;
+        }
+
+        .role-dropdown--visible {
+            display: block;
+        }
+
+        .role-dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 8px 14px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 13px;
+            color: #374151;
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+
+        .role-dropdown-item:hover {
+            background: #f1f5f9;
+        }
+
+        .role-dropdown-item--danger {
+            color: #dc2626;
+        }
+
+        .role-dropdown-item--danger:hover {
+            background: #fef2f2;
+        }
+
+        /* ── Right Panel: Permission Config ──────────────────────────── */
+
+        .panel-right {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-right-header {
+            padding: 16px 22px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .panel-right-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .panel-right-title span {
+            color: #2563eb;
+        }
+
+        .panel-right-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit-name {
+            padding: 6px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            color: #374151;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+
+        .btn-edit-name:hover {
+            background: #f9fafb;
+        }
+
+        .btn-delete-role {
+            padding: 6px 14px;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            background: #fff;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+
+        .btn-delete-role:hover {
+            background: #fef2f2;
+        }
+
+        .role-description {
+            padding: 12px 22px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .role-description label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .role-description input {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #333;
+            background: #f8fafc;
+            transition: border-color 0.15s;
+        }
+
+        .role-description input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
+        }
+
+        /* ── Permissions Table ────────────────────────────────────────── */
+
+        .permissions-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .perm-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .perm-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+            padding: 10px 14px;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .perm-table th:first-child {
+            text-align: left;
+            min-width: 200px;
+        }
+
+        .perm-table .group-row td {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #334155;
+            padding: 8px 14px;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .perm-table .perm-row td {
+            padding: 8px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .perm-table .perm-row td:first-child {
+            text-align: left;
+            color: #334155;
+            padding-left: 24px;
+        }
+
+        .perm-table .perm-row:hover td {
+            background: #fafbfd;
+        }
+
+        /* ── CSS Toggle Switch ────────────────────────────────────────── */
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #cbd5e1;
+            border-radius: 20px;
+            transition: background 0.2s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: #2563eb;
+        }
+
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(16px);
+        }
+
+        .toggle input:focus + .toggle-slider {
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+        }
+
+        /* ── Bottom Save Bar ──────────────────────────────────────────── */
+
+        .save-bar {
+            padding: 14px 22px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #fafbfc;
+        }
+
+        .btn-save {
+            padding: 9px 28px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-save:hover {
+            background: #1d4ed8;
+        }
+
+        /* ── Responsive ───────────────────────────────────────────────── */
+
+        @media (max-width: 900px) {
+            .split-panel {
+                flex-direction: column;
+                height: auto;
+            }
+            .panel-left {
+                width: 100%;
+                min-width: 0;
+                border-radius: 8px 8px 0 0;
+                max-height: 260px;
+            }
+            .panel-right {
+                border-left: 1px solid #e2e8f0;
+                border-radius: 0 0 8px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar"></aside>
+        <div class="main-area">
+            <div id="header"></div>
+            <div class="content">
+
+                <div class="split-panel">
+                    <!-- ══ Left Panel: Role List ══════════════════════════ -->
+                    <div class="panel-left">
+                        <div class="panel-left-header">
+                            <div class="panel-left-title">DANH SACH ROLE</div>
+                            <button class="btn-create-role" data-open-modal="modalCreateRole">+ Tao role moi</button>
+                        </div>
+                        <div class="role-list" id="roleList">
+                            <!-- Roles rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- ══ Right Panel: Permission Config ═════════════════ -->
+                    <div class="panel-right">
+                        <div class="panel-right-header">
+                            <div class="panel-right-title" id="permTitle">QUYEN CUA ROLE: <span>Admin</span></div>
+                            <div class="panel-right-actions">
+                                <button class="btn-edit-name" id="btnEditName">Sua ten</button>
+                                <button class="btn-delete-role" id="btnDeleteRole">Xoa role</button>
+                            </div>
+                        </div>
+                        <div class="role-description">
+                            <label>Mo ta</label>
+                            <input type="text" id="roleDescInput" value="Quan tri he thong toan quyen">
+                        </div>
+                        <div class="permissions-area">
+                            <table class="perm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Module</th>
+                                        <th>Xem</th>
+                                        <th>Tao</th>
+                                        <th>Sua</th>
+                                        <th>Xoa</th>
+                                        <th>Xuat file</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="permBody">
+                                    <!-- Rendered by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="save-bar">
+                            <button class="btn-save" id="btnSave">Luu thay doi</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div id="footer"></div>
+        </div>
+    </div>
+
+    <!-- ══ Modal: Create New Role ═════════════════════════════════════ -->
+    <div class="modal" id="modalCreateRole" aria-hidden="true">
+        <div class="modal-dialog" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Tao role moi</h3>
+                <button class="modal-close" data-close-modal="modalCreateRole">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Ten role <span style="color:#dc2626">*</span></label>
+                    <input type="text" class="form-control" id="newRoleName" placeholder="Nhap ten role...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mo ta</label>
+                    <input type="text" class="form-control" id="newRoleDesc" placeholder="Mo ta vai tro...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close-modal="modalCreateRole">Huy</button>
+                <button class="btn btn-primary" id="btnConfirmCreate">Tao role</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js?v=5"></script>
+    <script>initPage('w14-phan-quyen.html', 'CAU HINH / PHAN QUYEN');</script>
+    <script>
+    (function() {
+        'use strict';
+
+        // ── Role Data ───────────────────────────────────────────────────
+
+        var roles = [
+            { id: 'admin',      name: 'Admin',             users: 5,  desc: 'Quan tri he thong toan quyen' },
+            { id: 'director',   name: 'Director',          users: 2,  desc: 'Ban giam doc' },
+            { id: 'sale-mgr',   name: 'Sale Manager',      users: 8,  desc: 'Quan ly ban hang' },
+            { id: 'sale-staff', name: 'Sale Staff',        users: 15, desc: 'Nhan vien ban hang' },
+            { id: 'wh-mgr',    name: 'Warehouse Manager', users: 3,  desc: 'Quan ly kho' },
+            { id: 'wh-staff',  name: 'Warehouse Staff',   users: 10, desc: 'Nhan vien kho' },
+            { id: 'accountant', name: 'Accountant',        users: 4,  desc: 'Ke toan' }
+        ];
+
+        // ── Permission structure ────────────────────────────────────────
+
+        var permGroups = [
+            {
+                group: 'CRM & Ban hang',
+                modules: [
+                    { key: 'crm',      label: 'Khach hang (CRM)' },
+                    { key: 'quote',    label: 'Bao gia' },
+                    { key: 'order',    label: 'Don hang' },
+                    { key: 'po',       label: 'Don mua hang' }
+                ]
+            },
+            {
+                group: 'Kho & San pham',
+                modules: [
+                    { key: 'wh-in',    label: 'Nhap kho' },
+                    { key: 'wh-out',   label: 'Xuat kho' },
+                    { key: 'wh-loc',   label: 'Vi tri kho' },
+                    { key: 'wh-tenant',label: 'Don vi thue kho' },
+                    { key: 'wh-stock', label: 'Tra cuu ton kho' },
+                    { key: 'product',  label: 'Quan ly san pham' }
+                ]
+            },
+            {
+                group: 'He thong',
+                modules: [
+                    { key: 'account',  label: 'Tai khoan' },
+                    { key: 'config',   label: 'Cau hinh' },
+                    { key: 'acct',     label: 'Ke toan' }
+                ]
+            }
+        ];
+
+        var permActions = ['view', 'create', 'edit', 'delete', 'export'];
+
+        // All-on for Admin
+        function allOn() {
+            var p = {};
+            permGroups.forEach(function(g) {
+                g.modules.forEach(function(m) {
+                    p[m.key] = { view: true, create: true, edit: true, delete: true, export: true };
+                });
+            });
+            return p;
+        }
+
+        // Sale Staff: limited permissions
+        function saleStaffPerms() {
+            var p = {};
+            permGroups.forEach(function(g) {
+                g.modules.forEach(function(m) {
+                    p[m.key] = { view: false, create: false, edit: false, delete: false, export: false };
+                });
+            });
+            // CRM & Sales: view + create + edit, no delete/export
+            ['crm','quote','order','po'].forEach(function(k) {
+                p[k] = { view: true, create: true, edit: true, delete: false, export: false };
+            });
+            // Warehouse: view only for some
+            p['wh-in']    = { view: true, create: false, edit: false, delete: false, export: false };
+            p['wh-out']   = { view: true, create: false, edit: false, delete: false, export: false };
+            p['wh-stock'] = { view: true, create: false, edit: false, delete: false, export: true };
+            p['product']  = { view: true, create: false, edit: false, delete: false, export: false };
+            // System: no access
+            return p;
+        }
+
+        // Permission presets per role
+        var rolePermissions = {
+            'admin':      allOn(),
+            'director':   allOn(),
+            'sale-mgr':   (function() {
+                var p = allOn();
+                p['account'] = { view: true, create: false, edit: false, delete: false, export: false };
+                p['config']  = { view: true, create: false, edit: false, delete: false, export: false };
+                return p;
+            })(),
+            'sale-staff': saleStaffPerms(),
+            'wh-mgr':     (function() {
+                var p = allOn();
+                p['crm']    = { view: true, create: false, edit: false, delete: false, export: false };
+                p['quote']  = { view: true, create: false, edit: false, delete: false, export: false };
+                p['order']  = { view: true, create: false, edit: false, delete: false, export: true };
+                p['po']     = { view: true, create: true,  edit: true,  delete: false, export: true };
+                p['account']= { view: false, create: false, edit: false, delete: false, export: false };
+                p['config'] = { view: false, create: false, edit: false, delete: false, export: false };
+                return p;
+            })(),
+            'wh-staff':   (function() {
+                var p = {};
+                permGroups.forEach(function(g) {
+                    g.modules.forEach(function(m) {
+                        p[m.key] = { view: false, create: false, edit: false, delete: false, export: false };
+                    });
+                });
+                p['wh-in']     = { view: true, create: true, edit: true, delete: false, export: false };
+                p['wh-out']    = { view: true, create: true, edit: true, delete: false, export: false };
+                p['wh-loc']    = { view: true, create: false, edit: false, delete: false, export: false };
+                p['wh-tenant'] = { view: true, create: false, edit: false, delete: false, export: false };
+                p['wh-stock']  = { view: true, create: false, edit: false, delete: false, export: true };
+                p['product']   = { view: true, create: false, edit: false, delete: false, export: false };
+                return p;
+            })(),
+            'accountant': (function() {
+                var p = {};
+                permGroups.forEach(function(g) {
+                    g.modules.forEach(function(m) {
+                        p[m.key] = { view: true, create: false, edit: false, delete: false, export: true };
+                    });
+                });
+                p['acct'] = { view: true, create: true, edit: true, delete: true, export: true };
+                return p;
+            })()
+        };
+
+        var activeRoleId = 'admin';
+        var openDropdownId = null;
+
+        // ── Render Role List ────────────────────────────────────────────
+
+        function renderRoleList() {
+            var container = document.getElementById('roleList');
+            var html = '';
+
+            roles.forEach(function(role) {
+                var isActive = role.id === activeRoleId;
+                html += '<div class="role-item' + (isActive ? ' role-item--active' : '') + '" data-role-id="' + role.id + '">';
+                html +=   '<div class="role-info">';
+                html +=     '<div class="role-name">' + role.name + '</div>';
+                html +=     '<div class="role-users">' + role.users + ' nguoi dung</div>';
+                html +=   '</div>';
+                html +=   '<button class="role-menu-btn" data-role-menu="' + role.id + '" title="Tuy chon">';
+                html +=     '&#8942;';
+                html +=   '</button>';
+                html +=   '<div class="role-dropdown" id="dropdown-' + role.id + '">';
+                html +=     '<button class="role-dropdown-item" data-action="edit" data-role="' + role.id + '">Sua ten role</button>';
+                html +=     '<button class="role-dropdown-item role-dropdown-item--danger" data-action="delete" data-role="' + role.id + '">Xoa role</button>';
+                html +=   '</div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ── Render Permissions Table ────────────────────────────────────
+
+        function renderPermissions() {
+            var perms = rolePermissions[activeRoleId] || allOn();
+            var role = roles.find(function(r) { return r.id === activeRoleId; });
+            var tbody = document.getElementById('permBody');
+            var html = '';
+
+            permGroups.forEach(function(group) {
+                // Group header row
+                html += '<tr class="group-row"><td colspan="6">' + group.group + '</td></tr>';
+
+                group.modules.forEach(function(mod) {
+                    var mp = perms[mod.key] || {};
+                    html += '<tr class="perm-row">';
+                    html += '<td>' + mod.label + '</td>';
+
+                    permActions.forEach(function(action) {
+                        var isOn = mp[action] !== false;
+                        var checkedAttr = isOn ? ' checked' : '';
+                        html += '<td>';
+                        html += '<label class="toggle">';
+                        html += '<input type="checkbox" data-module="' + mod.key + '" data-action="' + action + '"' + checkedAttr + '>';
+                        html += '<span class="toggle-slider"></span>';
+                        html += '</label>';
+                        html += '</td>';
+                    });
+
+                    html += '</tr>';
+                });
+            });
+
+            tbody.innerHTML = html;
+
+            // Update header
+            document.getElementById('permTitle').innerHTML = 'QUYEN CUA ROLE: <span>' + role.name + '</span>';
+            document.getElementById('roleDescInput').value = role.desc;
+        }
+
+        // ── Select a Role ───────────────────────────────────────────────
+
+        function selectRole(roleId) {
+            activeRoleId = roleId;
+            renderRoleList();
+            renderPermissions();
+        }
+
+        // ── Close all dropdowns ─────────────────────────────────────────
+
+        function closeAllDropdowns() {
+            var dropdowns = document.querySelectorAll('.role-dropdown--visible');
+            for (var i = 0; i < dropdowns.length; i++) {
+                dropdowns[i].classList.remove('role-dropdown--visible');
+            }
+            openDropdownId = null;
+        }
+
+        // ── Event Delegation ────────────────────────────────────────────
+
+        document.getElementById('roleList').addEventListener('click', function(e) {
+            // Handle dropdown menu button
+            var menuBtn = e.target.closest('.role-menu-btn');
+            if (menuBtn) {
+                e.stopPropagation();
+                var roleId = menuBtn.getAttribute('data-role-menu');
+                var dropdown = document.getElementById('dropdown-' + roleId);
+
+                if (openDropdownId === roleId) {
+                    closeAllDropdowns();
+                } else {
+                    closeAllDropdowns();
+                    dropdown.classList.add('role-dropdown--visible');
+                    openDropdownId = roleId;
+                }
+                return;
+            }
+
+            // Handle dropdown action
+            var dropdownItem = e.target.closest('.role-dropdown-item');
+            if (dropdownItem) {
+                e.stopPropagation();
+                var action = dropdownItem.getAttribute('data-action');
+                var roleId = dropdownItem.getAttribute('data-role');
+                closeAllDropdowns();
+
+                if (action === 'edit') {
+                    alert('Chuc nang sua ten role: ' + roleId);
+                } else if (action === 'delete') {
+                    alert('Chuc nang xoa role: ' + roleId);
+                }
+                return;
+            }
+
+            // Handle role selection
+            var roleItem = e.target.closest('.role-item');
+            if (roleItem) {
+                var roleId = roleItem.getAttribute('data-role-id');
+                selectRole(roleId);
+            }
+        });
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function() {
+            closeAllDropdowns();
+        });
+
+        // Toggle switch change handler
+        document.getElementById('permBody').addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox') {
+                var mod = e.target.getAttribute('data-module');
+                var action = e.target.getAttribute('data-action');
+                if (rolePermissions[activeRoleId] && rolePermissions[activeRoleId][mod]) {
+                    rolePermissions[activeRoleId][mod][action] = e.target.checked;
+                }
+            }
+        });
+
+        // Save button
+        document.getElementById('btnSave').addEventListener('click', function() {
+            var role = roles.find(function(r) { return r.id === activeRoleId; });
+            alert('Da luu thay doi quyen cho role: ' + role.name);
+        });
+
+        // Header action buttons
+        document.getElementById('btnEditName').addEventListener('click', function() {
+            var role = roles.find(function(r) { return r.id === activeRoleId; });
+            var newName = prompt('Nhap ten moi cho role:', role.name);
+            if (newName && newName.trim()) {
+                role.name = newName.trim();
+                renderRoleList();
+                renderPermissions();
+            }
+        });
+
+        document.getElementById('btnDeleteRole').addEventListener('click', function() {
+            var role = roles.find(function(r) { return r.id === activeRoleId; });
+            if (confirm('Ban co chac muon xoa role "' + role.name + '"?')) {
+                alert('Da xoa role: ' + role.name + ' (wireframe demo)');
+            }
+        });
+
+        // Create role modal confirm
+        document.getElementById('btnConfirmCreate').addEventListener('click', function() {
+            var nameInput = document.getElementById('newRoleName');
+            var descInput = document.getElementById('newRoleDesc');
+            var name = nameInput.value.trim();
+            var desc = descInput.value.trim();
+
+            if (!name) {
+                nameInput.focus();
+                nameInput.style.borderColor = '#dc2626';
+                return;
+            }
+
+            var newId = 'role-' + Date.now();
+            var newRole = { id: newId, name: name, users: 0, desc: desc || '' };
+            roles.push(newRole);
+            rolePermissions[newId] = allOn();
+
+            // Close modal and reset
+            closeModal('modalCreateRole');
+            nameInput.value = '';
+            descInput.value = '';
+            nameInput.style.borderColor = '';
+
+            // Select the new role
+            selectRole(newId);
+        });
+
+        // ── Initial Render ──────────────────────────────────────────────
+
+        renderRoleList();
+        renderPermissions();
+
+    })();
+    </script>
+</body>
+</html>
