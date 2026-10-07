@@ -387,15 +387,6 @@
           </button>
         </div>
 
-        <!-- Rack Group Tabs -->
-        <div class="rack-tabs" id="rack-tabs">
-          <button class="rack-tab active" data-group="1-5">RACKS 1 – 5</button>
-          <button class="rack-tab" data-group="6-10">RACKS 6 – 10</button>
-          <button class="rack-tab" data-group="11-15">RACKS 11 – 15</button>
-          <button class="rack-tab" data-group="16-21">RACKS 16 – 21</button>
-          <button class="rack-tab" data-group="22-26">RACKS 22 – 26</button>
-        </div>
-
         <!-- Legend -->
         <div class="map-toolbar">
           <div class="legend-bar">
@@ -629,31 +620,23 @@
         return { name: rackName, index: rackIndex, floors: floors };
       }
 
-      var rackGroups = {
-        '1-5': [
-          generateRackData('B01', 1, 20),
-          generateRackData('B02', 2, 20),
-          generateRackData('B03', 3, 20),
-          generateRackData('B04', 4, 20),
-          generateRackData('B05', 5, 20)
-        ],
-        '6-10': [
-          generateRackData('B06', 6, 18),
-          generateRackData('B07', 7, 18),
-          generateRackData('B08', 8, 18),
-          generateRackData('B09', 9, 18),
-          generateRackData('B10', 10, 18)
-        ],
-        '11-15': [
-          generateRackData('B11', 11, 16),
-          generateRackData('B12', 12, 16),
-          generateRackData('B13', 13, 16),
-          generateRackData('B14', 14, 16),
-          generateRackData('B15', 15, 16)
-        ]
-      };
-
-      var activeGroup = '1-5';
+      var allRacks = [
+        generateRackData('B01', 1, 20),
+        generateRackData('B02', 2, 20),
+        generateRackData('B03', 3, 20),
+        generateRackData('B04', 4, 20),
+        generateRackData('B05', 5, 20),
+        generateRackData('B06', 6, 18),
+        generateRackData('B07', 7, 18),
+        generateRackData('B08', 8, 18),
+        generateRackData('B09', 9, 18),
+        generateRackData('B10', 10, 18),
+        generateRackData('B11', 11, 16),
+        generateRackData('B12', 12, 16),
+        generateRackData('B13', 13, 16),
+        generateRackData('B14', 14, 16),
+        generateRackData('B15', 15, 16)
+      ];
 
       // ── Utility: color class based on utilization ──────────────────
       function slotClass(used, total) {
@@ -711,14 +694,13 @@
 
       function renderRackContainer() {
         var container = document.getElementById('rack-container');
-        var racks = rackGroups[activeGroup];
-        if (!racks) {
+        if (!allRacks.length) {
           container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Chưa có dữ liệu</div></div>';
           return;
         }
         var html = '';
-        for (var i = 0; i < racks.length; i++) {
-          html += renderRack(racks[i]);
+        for (var i = 0; i < allRacks.length; i++) {
+          html += renderRack(allRacks[i]);
         }
         // Add rack button
         html += '<div class="rack-add-section" onclick="document.getElementById(\'modal-init\').classList.add(\'modal--visible\')">';
@@ -734,15 +716,6 @@
         if (!tab) return;
         document.querySelectorAll('.room-tab').forEach(function(t) { t.classList.remove('active'); });
         tab.classList.add('active');
-      });
-
-      document.getElementById('rack-tabs').addEventListener('click', function(e) {
-        var tab = e.target.closest('.rack-tab');
-        if (!tab) return;
-        document.querySelectorAll('.rack-tab').forEach(function(t) { t.classList.remove('active'); });
-        tab.classList.add('active');
-        activeGroup = tab.getAttribute('data-group');
-        renderRackContainer();
       });
 
       // ── Click on slot cell → navigate to detail ────────────────────
