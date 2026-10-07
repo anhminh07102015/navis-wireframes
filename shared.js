@@ -15,7 +15,6 @@
       icon: 'inventory_2',
       id: 'menu-quan-ly-kho',
       children: [
-        { label: 'Dashboard kho', badge: 'Mới', href: 'w13-dashboard-kho.html' },
         { label: 'Đơn vị thuê kho', badge: 'Mới', href: 'w01-don-vi-thue-kho.html' },
         { label: 'Điều chuyển vị trí', badge: 'Mới', href: 'w05-dieu-chuyen-vi-tri.html' },
         { label: 'Nhập kho', badge: 'Nâng cấp', href: 'w08-danh-sach-nhap-kho.html' },
